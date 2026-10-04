@@ -1,0 +1,72 @@
+services:
+  # ---------------------------------------------------------------------------
+  # LiteLLM proxy — the gateway clients talk to.
+  #
+  # The models are served by Ollama running NATIVELY on the Mac host (so it gets
+  # Metal GPU acceleration — Ollama can't be GPU-accelerated inside Docker on
+  # macOS). LiteLLM reaches the host Ollama via host.docker.internal:11434.
+  # ---------------------------------------------------------------------------
+  litellm:
+    image: ghcr.io/berriai/litellm:main-stable
+    container_name: litellm
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command:
+      - --config=/etc/litellm/config.yaml
+      - --port=4000
+    environment:
+      - LITELLM_MASTER_KEY=${LITELLM_MASTER_KEY:?set LITELLM_MASTER_KEY in .env}
+      - LITELLM_SALT_KEY=${LITELLM_SALT_KEY:?set LITELLM_SALT_KEY in .env}
+      - DATABASE_URL=postgresql://litellm:${POSTGRES_PASSWORD:-litellm}@postgres:5432/litellm
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      # Where the host's Ollama lives, from inside the container:
+      - OLLAMA_BASE_URL=http://host.docker.internal:11434
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ./litellm/config.yaml:/etc/litellm/config.yaml:ro
+    ports:
+      - "4000:4000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:4000/health/liveliness')"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
+
+  # ---------------------------------------------------------------------------
+  # Postgres — LiteLLM virtual keys, spend tracking, logs
+  # ---------------------------------------------------------------------------
+  postgres:
+    image: postgres:16-alpine
+    container_name: litellm-postgres
+    environment:
+      - POSTGRES_USER=litellm
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-litellm}
+      - POSTGRES_DB=litellm
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U litellm"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ---------------------------------------------------------------------------
+  # Redis — used by LiteLLM for cross-instance routing + response caching
+  # ---------------------------------------------------------------------------
+  redis:
+    image: redis:7-alpine
+    container_name: litellm-redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  pg-data:

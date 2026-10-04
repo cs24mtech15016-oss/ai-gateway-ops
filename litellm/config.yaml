@@ -1,0 +1,60 @@
+# LiteLLM proxy configuration
+# Docs: https://docs.litellm.ai/docs/proxy/configs
+#
+# Backends are models served by Ollama on the Mac host (Metal-accelerated).
+# LiteLLM talks to them with the "ollama_chat/" provider prefix, pointing
+# api_base at the host Ollama (host.docker.internal:11434 from the container).
+
+model_list:
+  # ---- Qwen2.5 7B (Ollama: qwen2.5:7b) ----
+  - model_name: qwen2.5-7b
+    litellm_params:
+      model: ollama_chat/qwen2.5:7b
+      api_base: os.environ/OLLAMA_BASE_URL
+
+  # ---- Llama 3.1 8B (Ollama: llama3.1:8b) ----
+  - model_name: llama-3.1-8b
+    litellm_params:
+      model: ollama_chat/llama3.1:8b
+      api_base: os.environ/OLLAMA_BASE_URL
+
+  # ---- Load-balanced alias across both backends ----
+  - model_name: chat
+    litellm_params:
+      model: ollama_chat/qwen2.5:7b
+      api_base: os.environ/OLLAMA_BASE_URL
+  - model_name: chat
+    litellm_params:
+      model: ollama_chat/llama3.1:8b
+      api_base: os.environ/OLLAMA_BASE_URL
+
+  # ---- Auto Router: picks a model per-request from prompt complexity ----
+  # Beta feature (LiteLLM >= v1.94). Default classifier is a local heuristic
+  # (no extra API calls). Request model="smart-router" and it scores the prompt,
+  # maps it to a tier, and routes to the model named for that tier.
+  # Docs: https://docs.litellm.ai/docs/proxy/auto_routing
+  - model_name: smart-router
+    litellm_params:
+      model: auto_router/complexity_router
+      complexity_router_config:
+        tiers:
+          SIMPLE:    qwen2.5-7b     # short / trivial asks -> fast small model
+          MEDIUM:    qwen2.5-7b
+          COMPLEX:   llama-3.1-8b   # multi-step / technical -> stronger model
+          REASONING: llama-3.1-8b
+      complexity_router_default_model: qwen2.5-7b
+
+router_settings:
+  routing_strategy: simple-shuffle   # try: least-busy, latency-based-routing
+  redis_host: os.environ/REDIS_HOST
+  redis_port: os.environ/REDIS_PORT
+  num_retries: 2
+  timeout: 300                       # local generation can be slow on first load
+
+litellm_settings:
+  drop_params: true                  # drop params a backend doesn't support
+
+general_settings:
+  master_key: os.environ/LITELLM_MASTER_KEY
+  database_url: os.environ/DATABASE_URL
+  store_model_in_db: true
