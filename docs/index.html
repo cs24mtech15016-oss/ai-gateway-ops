@@ -1,0 +1,597 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="CheckpointRouter is a research proposal for selective, cost-aware model routing in long-horizon AI agents."
+    />
+    <meta name="theme-color" content="#111714" />
+    <meta property="og:title" content="CheckpointRouter" />
+    <meta
+      property="og:description"
+      content="Selective, episode-aware model routing for long-horizon agents."
+    />
+    <meta property="og:type" content="website" />
+    <title>CheckpointRouter — Long-Horizon Agent Routing</title>
+    <script>document.documentElement.classList.add("js");</script>
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="styles.css" />
+    <script src="app.js" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <header class="site-header" data-header>
+      <a class="brand" href="#top" aria-label="CheckpointRouter home">
+        <span class="brand-mark" aria-hidden="true">CR</span>
+        <span>CheckpointRouter</span>
+      </a>
+      <nav class="desktop-nav" aria-label="Primary navigation">
+        <a href="#premise">Premise</a>
+        <a href="#prior-art">Prior art</a>
+        <a href="#method">Method</a>
+        <a href="#evaluation">Evaluation</a>
+        <a href="#sources">Sources</a>
+      </nav>
+      <a
+        class="header-cta"
+        href="https://github.com/cs24mtech15016-oss/ai-gateway-ops"
+        target="_blank"
+        rel="noreferrer"
+      >
+        View repository
+        <span aria-hidden="true">↗</span>
+      </a>
+    </header>
+
+    <main id="main">
+      <section class="hero" id="top">
+        <div class="hero-grid">
+          <div class="hero-copy reveal">
+            <div class="eyebrow"><span></span> Research concept · long-horizon agents</div>
+            <h1>
+              Route at the moments
+              <em>that actually matter.</em>
+            </h1>
+            <p class="hero-lede">
+              CheckpointRouter studies when an agent should reconsider its model—not only which
+              model to choose. It uses execution evidence, terminal outcomes, and resource budgets
+              to make selective routing decisions across a long-running task.
+            </p>
+            <div class="hero-actions">
+              <a class="button button-primary" href="#research-statement">Read the proposal</a>
+              <a class="button button-secondary" href="#prior-art">Explore the evidence</a>
+            </div>
+            <dl class="hero-facts" aria-label="Research scope">
+              <div><dt>Decision unit</dt><dd>Execution checkpoint</dd></div>
+              <div><dt>Primary outcome</dt><dd>Episode success</dd></div>
+              <div><dt>Formal model</dt><dd>Constrained SMDP</dd></div>
+            </dl>
+          </div>
+
+          <div class="episode-card reveal" aria-label="Illustration of a routed agent episode">
+            <div class="card-topline">
+              <span>Agent episode</span>
+              <span class="live-pill"><i></i> selective routing</span>
+            </div>
+            <div class="episode-flow">
+              <article class="episode-step is-cheap">
+                <span class="step-index">01</span>
+                <div><strong>Explore</strong><small>Cheap model · repository scan</small></div>
+                <span class="cost">$</span>
+              </article>
+              <div class="checkpoint">
+                <span>Checkpoint</span>
+                <small>Plan complexity increased</small>
+              </div>
+              <article class="episode-step is-strong">
+                <span class="step-index">02</span>
+                <div><strong>Plan + implement</strong><small>Strong model · architectural change</small></div>
+                <span class="cost">$$$</span>
+              </article>
+              <div class="checkpoint checkpoint-alert">
+                <span>Checkpoint</span>
+                <small>Tests pass; risk has fallen</small>
+              </div>
+              <article class="episode-step is-cheap">
+                <span class="step-index">03</span>
+                <div><strong>Verify + document</strong><small>Cheap model · mechanical finish</small></div>
+                <span class="cost">$</span>
+              </article>
+            </div>
+            <div class="episode-footer">
+              <span><i class="dot dot-success"></i> Task resolved</span>
+              <span>Frontier capability, selectively applied</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section section-light" id="premise">
+        <div class="section-heading reveal">
+          <span class="section-number">01</span>
+          <div>
+            <p class="kicker">Premise</p>
+            <h2>Difficulty changes while an agent works.</h2>
+          </div>
+        </div>
+
+        <div class="premise-layout">
+          <div class="prose reveal">
+            <p class="lead">
+              A software-engineering agent moves through exploration, planning, editing, testing,
+              diagnosis, recovery, and verification. These phases do not demand the same level of
+              model capability.
+            </p>
+            <p>
+              Initial prompts are incomplete routing signals: the important evidence often appears
+              only after the agent has inspected the repository or interacted with tools. Yet
+              reconsidering the model at every call creates unnecessary switching, cache loss, and
+              inconsistent plans.
+            </p>
+          </div>
+          <div class="premise-cards reveal">
+            <article>
+              <span class="icon-box">↗</span>
+              <h3>Hidden difficulty</h3>
+              <p>A local-looking issue can reveal a multi-module architectural dependency.</p>
+            </article>
+            <article>
+              <span class="icon-box">!</span>
+              <h3>Execution evidence</h3>
+              <p>Test failures, repetition, and stalled progress reveal risk unavailable initially.</p>
+            </article>
+            <article>
+              <span class="icon-box">⇄</span>
+              <h3>Changing capability needs</h3>
+              <p>Planning may need a frontier model; mechanical verification may not.</p>
+            </article>
+            <article>
+              <span class="icon-box">◎</span>
+              <h3>Selective decisions</h3>
+              <p>Only open a routing decision when new evidence can change the best action.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section section-dark" id="problem">
+        <div class="section-heading reveal">
+          <span class="section-number">02</span>
+          <div>
+            <p class="kicker">Problem</p>
+            <h2>Two decisions, one delayed outcome.</h2>
+          </div>
+        </div>
+
+        <div class="decision-grid reveal">
+          <article class="decision-card">
+            <span class="decision-label">Decision A</span>
+            <h3>When should the system route?</h3>
+            <p>
+              Decide whether new trajectory evidence makes reconsideration valuable enough to
+              justify routing and handoff overhead.
+            </p>
+            <code>open_checkpoint(s) ∈ { no, yes }</code>
+          </article>
+          <article class="decision-card decision-card-accent">
+            <span class="decision-label">Decision B</span>
+            <h3>Which model should take over?</h3>
+            <p>
+              Select the continuation whose expected terminal success is worth its remaining cost,
+              latency, and switching risk.
+            </p>
+            <code>action(s) ∈ { continue, escalate, switch, replan }</code>
+          </article>
+        </div>
+
+        <div class="comparison-strip reveal" aria-label="Comparison of routing strategies">
+          <article>
+            <span>Prompt-only</span>
+            <strong>One decision</strong>
+            <p>Efficient, but blind to evidence discovered during execution.</p>
+          </article>
+          <article>
+            <span>Per-call</span>
+            <strong>Every decision</strong>
+            <p>Adaptive, but granular, myopic, and prone to unnecessary switching.</p>
+          </article>
+          <article class="is-selected">
+            <span>Checkpoint</span>
+            <strong>Selective decisions</strong>
+            <p>Route only at information-bearing events and optimize the remaining episode.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section section-paper" id="research-statement">
+        <div class="statement-card reveal">
+          <p class="kicker">Research statement</p>
+          <blockquote>
+            How can a long-horizon agent determine <em>when</em> model selection should be
+            reconsidered and <em>which model</em> should execute the next phase, given its execution
+            history, environment state, observed progress, failures, and remaining resources?
+          </blockquote>
+          <p>
+            The objective is to preserve frontier-model task completion while reducing total
+            episode cost and latency—and while avoiding routing decisions that add no value.
+          </p>
+        </div>
+      </section>
+
+      <section class="section section-light" id="prior-art">
+        <div class="section-heading reveal">
+          <span class="section-number">03</span>
+          <div>
+            <p class="kicker">Prior art</p>
+            <h2>The field is active. The opportunity is specific.</h2>
+            <p class="section-intro">
+              This project does not claim to invent multi-turn routing. It builds on query routers,
+              cascades, partial-trajectory escalation, and per-turn agent routers.
+            </p>
+          </div>
+        </div>
+
+        <div class="prior-map reveal">
+          <article>
+            <div class="prior-stage">Query</div>
+            <div class="prior-body">
+              <h3>Single-turn adaptive routing</h3>
+              <p>
+                <a href="https://arxiv.org/abs/2508.21141" target="_blank" rel="noreferrer">PILOT</a>
+                frames model selection as a budget-aware contextual bandit that learns from feedback
+                on the selected model.
+              </p>
+            </div>
+            <span class="prior-gap">No evolving environment state</span>
+          </article>
+          <article>
+            <div class="prior-stage">Prefix</div>
+            <div class="prior-body">
+              <h3>Partial-trajectory escalation</h3>
+              <p>
+                <a href="https://arxiv.org/abs/2607.00053" target="_blank" rel="noreferrer">SWE-Router</a>
+                uses early software-agent exploration to decide whether a cheap model should continue
+                or a stronger model should restart.
+              </p>
+            </div>
+            <span class="prior-gap">Primarily one escalation point</span>
+          </article>
+          <article>
+            <div class="prior-stage">Turn</div>
+            <div class="prior-body">
+              <h3>History-aware multi-turn routing</h3>
+              <p>
+                <a href="https://arxiv.org/abs/2604.23530" target="_blank" rel="noreferrer">MTRouter</a>
+                selects a model at each turn from the interaction history and candidate-model
+                representation.
+              </p>
+            </div>
+            <span class="prior-gap">Decision timing is fixed</span>
+          </article>
+          <article>
+            <div class="prior-stage">Step</div>
+            <div class="prior-body">
+              <h3>Per-step agent routing</h3>
+              <p>
+                <a href="https://arxiv.org/abs/2605.18859" target="_blank" rel="noreferrer">TwinRouterBench</a>
+                evaluates routing on every agent call;
+                <a href="https://arxiv.org/abs/2609.22951" target="_blank" rel="noreferrer">AgentRouter</a>
+                describes dependency-aware tier selection across workflow steps.
+              </p>
+            </div>
+            <span class="prior-gap">Often local labels or every-call decisions</span>
+          </article>
+          <article>
+            <div class="prior-stage">Sequence</div>
+            <div class="prior-body">
+              <h3>Sequential routing and cascading</h3>
+              <p>
+                <a href="https://arxiv.org/abs/2506.09033" target="_blank" rel="noreferrer">Router-R1</a>,
+                <a href="https://arxiv.org/abs/2608.15817" target="_blank" rel="noreferrer">RLCascadeRouter</a>,
+                <a href="https://arxiv.org/abs/2310.12963" target="_blank" rel="noreferrer">AutoMix</a>, and
+                <a href="https://proceedings.neurips.cc/paper_files/paper/2024/hash/a6deba3b2408af45b3f9994c2152b862-Abstract-Conference.html" target="_blank" rel="noreferrer">TREACLE</a>
+                establish RL, POMDP, and constrained cascade foundations.
+              </p>
+            </div>
+            <span class="prior-gap">Usually answers, not persistent tool environments</span>
+          </article>
+        </div>
+
+        <aside class="honesty-note reveal">
+          <strong>Defensible positioning</strong>
+          <p>
+            The research gap is not “routing during long-horizon tasks.” It is the joint study of
+            <b>selective checkpoint timing</b>, <b>episode-level action value</b>,
+            <b>counterfactual continuation from the same environment state</b>, and
+            <b>handoff cost</b>.
+          </p>
+        </aside>
+      </section>
+
+      <section class="section section-accent" id="opportunity">
+        <div class="section-heading reveal">
+          <span class="section-number">04</span>
+          <div>
+            <p class="kicker">Research opportunity</p>
+            <h2>From next-response quality to remaining-episode value.</h2>
+          </div>
+        </div>
+        <div class="opportunity-grid reveal">
+          <article><span>01</span><h3>Checkpoint discovery</h3><p>Compare fixed-turn, event-triggered, phase-aware, and learned decisions.</p></article>
+          <article><span>02</span><h3>Long-term value</h3><p>Predict terminal success and remaining resources, not isolated response quality.</p></article>
+          <article><span>03</span><h3>Counterfactual branches</h3><p>Restore identical states and continue with alternative models to estimate marginal value.</p></article>
+          <article><span>04</span><h3>Handoff-aware control</h3><p>Measure history transfer, replanning, cache loss, inconsistency, and switching latency.</p></article>
+        </div>
+      </section>
+
+      <section class="section section-dark" id="formalization">
+        <div class="section-heading reveal">
+          <span class="section-number">05</span>
+          <div>
+            <p class="kicker">Formalization</p>
+            <h2>A constrained semi-Markov decision process.</h2>
+          </div>
+        </div>
+        <div class="formula-layout reveal">
+          <div class="formula-main">
+            <p class="formula-label">Primary objective</p>
+            <div class="formula">max<sub>π</sub> E<sub>π</sub>[Y]</div>
+            <div class="constraints">
+              <span>subject to</span>
+              <code>E<sub>π</sub>[C] ≤ B<sub>C</sub></code>
+              <code>E<sub>π</sub>[L] ≤ B<sub>L</sub></code>
+            </div>
+            <p>
+              <b>Y</b> is terminal success, <b>C</b> is total episode cost, <b>L</b> is total
+              latency, and <b>π</b> is the routing policy. The interval between checkpoints varies,
+              which makes the natural formulation semi-Markov.
+            </p>
+          </div>
+          <div class="formula-side">
+            <p class="formula-label">Practical action score</p>
+            <div class="score-lines">
+              <code>Q<sub>Y</sub>(s,a)</code><span>eventual success</span>
+              <code>− λ<sub>C</sub>Q<sub>C</sub>(s,a)</code><span>remaining cost</span>
+              <code>− λ<sub>L</sub>Q<sub>L</sub>(s,a)</code><span>remaining latency</span>
+              <code>− λ<sub>S</sub>Q<sub>S</sub>(s,a)</code><span>handoff penalty</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section section-light" id="method">
+        <div class="section-heading reveal">
+          <span class="section-number">06</span>
+          <div>
+            <p class="kicker">Method</p>
+            <h2>Branch, measure, learn, and evaluate end to end.</h2>
+          </div>
+        </div>
+
+        <div class="pipeline reveal" aria-label="Counterfactual data pipeline">
+          <article><span>1</span><h3>Run episode</h3><p>Execute an agent normally and identify meaningful events.</p></article>
+          <i aria-hidden="true">→</i>
+          <article><span>2</span><h3>Snapshot</h3><p>Save the trajectory, repository state, tests, and budget.</p></article>
+          <i aria-hidden="true">→</i>
+          <article><span>3</span><h3>Branch</h3><p>Continue the same checkpoint with alternative models.</p></article>
+          <i aria-hidden="true">→</i>
+          <article><span>4</span><h3>Measure</h3><p>Record terminal success, cost, latency, and failures.</p></article>
+          <i aria-hidden="true">→</i>
+          <article><span>5</span><h3>Learn</h3><p>Fit calibrated outcome and resource predictors.</p></article>
+        </div>
+
+        <div class="phases reveal">
+          <article>
+            <span class="phase-tag">Phase 1 · feasible now</span>
+            <h3>Two-model escalation</h3>
+            <p>
+              One cheap model, one strong model, and three interpretable checkpoints: after initial
+              exploration, first meaningful test failure, and repeated lack of progress.
+            </p>
+            <ul>
+              <li>Actions: continue cheap or escalate permanently</li>
+              <li>Learning: calibrated classification + cost regression</li>
+              <li>No reinforcement learning required</li>
+            </ul>
+          </article>
+          <article>
+            <span class="phase-tag">Phase 2 · evidence</span>
+            <h3>Counterfactual dataset</h3>
+            <p>
+              Generate alternative continuations from restorable checkpoints and quantify the
+              marginal value of escalation under identical starting conditions.
+            </p>
+            <ul>
+              <li>Terminal success as the primary target</li>
+              <li>Cost, latency, tool calls, and recovery as secondary targets</li>
+              <li>Repository- and task-family splits</li>
+            </ul>
+          </article>
+          <article>
+            <span class="phase-tag">Phase 3 · extension</span>
+            <h3>Selective sequential policy</h3>
+            <p>
+              Add learned checkpoint timing, multiple model tiers, de-escalation, and alternative
+              handoffs only after the simple system demonstrates value.
+            </p>
+            <ul>
+              <li>Explicit switching penalties</li>
+              <li>Offline constrained RL as an optional extension</li>
+              <li>Safe shadow evaluation before live control</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <section class="section section-paper" id="data">
+        <div class="section-heading reveal">
+          <span class="section-number">07</span>
+          <div>
+            <p class="kicker">Grounding data</p>
+            <h2>Public artifacts make a rigorous prototype possible.</h2>
+          </div>
+        </div>
+        <div class="data-grid reveal">
+          <a href="https://huggingface.co/SWE-Router" target="_blank" rel="noreferrer"><strong>SWE-Router</strong><span>Multi-model SWE trajectories and trained value models</span><i>↗</i></a>
+          <a href="https://github.com/CommonstackAI/TwinRouterBench" target="_blank" rel="noreferrer"><strong>TwinRouterBench</strong><span>Step labels, live SWE evaluation, and data pipeline</span><i>↗</i></a>
+          <a href="https://github.com/ynulihao/LLMRouterBench" target="_blank" rel="noreferrer"><strong>LLMRouterBench</strong><span>400K+ query-model records and cost fields</span><i>↗</i></a>
+          <a href="https://huggingface.co/datasets/JetBrains-Research/agent-trajectories-swesmith-random-subset" target="_blank" rel="noreferrer"><strong>JetBrains routed trajectories</strong><span>1,465 SWE-Smith episodes with per-step selected models</span><i>↗</i></a>
+          <a href="https://huggingface.co/datasets/SWE-bench/SWE-smith-trajectories" target="_blank" rel="noreferrer"><strong>SWE-Smith trajectories</strong><span>Large official collection of software-agent traces</span><i>↗</i></a>
+          <a href="https://huggingface.co/SWE-Gym/datasets" target="_blank" rel="noreferrer"><strong>SWE-Gym</strong><span>Training tasks, trajectories, and verifier data</span><i>↗</i></a>
+          <a href="https://huggingface.co/datasets/nvidia/Open-SWE-Traces" target="_blank" rel="noreferrer"><strong>Open-SWE-Traces</strong><span>Large-scale software-agent instruction traces</span><i>↗</i></a>
+          <a href="https://huggingface.co/datasets/NJU-LINK/CodeTraceBench" target="_blank" rel="noreferrer"><strong>CodeTraceBench</strong><span>Human-verified incorrect and unhelpful step annotations</span><i>↗</i></a>
+          <a href="https://huggingface.co/datasets/ulab-ai/Router-R1-Router-Dataset" target="_blank" rel="noreferrer"><strong>Router-R1 dataset</strong><span>Multi-round routing examples for sequential model use</span><i>↗</i></a>
+        </div>
+        <p class="data-caveat reveal">
+          <b>Important limitation:</b> logged trajectories reveal only the selected action. Reliable
+          causal comparison needs randomized action propensities, counterfactual branches, or careful
+          off-policy estimators. A large trace corpus is not automatically a routing dataset.
+        </p>
+      </section>
+
+      <section class="section section-dark" id="evaluation">
+        <div class="section-heading reveal">
+          <span class="section-number">08</span>
+          <div>
+            <p class="kicker">Evaluation</p>
+            <h2>Judge the episode, not the classification label.</h2>
+          </div>
+        </div>
+        <div class="evaluation-layout reveal">
+          <div>
+            <h3>Required baselines</h3>
+            <ol class="clean-list">
+              <li><span>01</span>Always-cheap and always-strong</li>
+              <li><span>02</span>Prompt-only router</li>
+              <li><span>03</span>Fixed early escalation</li>
+              <li><span>04</span>Rule-based event escalation</li>
+              <li><span>05</span>Independent per-call router</li>
+              <li><span>06</span>Checkpoint oracle from available branches</li>
+            </ol>
+          </div>
+          <div>
+            <h3>Primary metrics</h3>
+            <div class="metric-grid">
+              <article><strong>Success</strong><span>End-to-end resolution rate</span></article>
+              <article><strong>Cost</strong><span>Total and per successful task</span></article>
+              <article><strong>Latency</strong><span>Wall-clock episode duration</span></article>
+              <article><strong>Switches</strong><span>Frequency and handoff overhead</span></article>
+              <article><strong>Calibration</strong><span>Accuracy of predicted success</span></article>
+              <article><strong>Regret</strong><span>Distance from checkpoint oracle</span></article>
+            </div>
+          </div>
+        </div>
+        <div class="headline-metric reveal">
+          <span>Headline operating result</span>
+          <strong>Minimum cost required to retain 95%, 98%, and 100% of the strongest-model success rate.</strong>
+        </div>
+      </section>
+
+      <section class="section section-light" id="feasibility">
+        <div class="section-heading reveal">
+          <span class="section-number">09</span>
+          <div>
+            <p class="kicker">Feasibility</p>
+            <h2>The router is cheap. The evidence is expensive.</h2>
+          </div>
+        </div>
+        <div class="feasibility-grid reveal">
+          <article class="feasibility-positive">
+            <span>Practical</span>
+            <h3>A focused first study</h3>
+            <ul>
+              <li>Two model tiers</li>
+              <li>Three event checkpoints</li>
+              <li>Monotonic escalation</li>
+              <li>Supervised value prediction</li>
+              <li>Small millisecond-scale router</li>
+            </ul>
+          </article>
+          <article class="feasibility-negative">
+            <span>Not practical initially</span>
+            <h3>A complete policy tree</h3>
+            <ul>
+              <li>Branching every agent turn</li>
+              <li>All models at every checkpoint</li>
+              <li>Unrestricted switching and restart</li>
+              <li>Online reinforcement learning</li>
+              <li>Claims without live episode evaluation</li>
+            </ul>
+          </article>
+          <article class="cost-card">
+            <span>Illustrative collection cost</span>
+            <div class="cost-equation">1,000 × 3 × 3 × $0.50</div>
+            <strong>≈ $4,500</strong>
+            <p>Tasks × checkpoints × actions × average continuation cost—before infrastructure and final evaluation.</p>
+          </article>
+        </div>
+        <aside class="honest-answer reveal">
+          <strong>Most honest expectation</strong>
+          <p>
+            A calibrated two-model escalation router is likely practical. A multi-model CMDP may be
+            academically interesting but unnecessary. The strongest competitor may be a simple rule:
+            escalate after failed tests, repetition, or stalled progress. The learned router must beat
+            that rule materially—not just statistically—to justify operational complexity.
+          </p>
+        </aside>
+      </section>
+
+      <section class="section section-accent" id="contributions">
+        <div class="section-heading reveal">
+          <span class="section-number">10</span>
+          <div>
+            <p class="kicker">Expected contributions</p>
+            <h2>A useful result, whether the router wins or not.</h2>
+          </div>
+        </div>
+        <div class="contribution-list reveal">
+          <article><span>01</span><p>A formal definition of selective checkpoint routing for long-horizon agents.</p></article>
+          <article><span>02</span><p>A taxonomy and detector for progress-, phase-, failure-, and budget-sensitive checkpoints.</p></article>
+          <article><span>03</span><p>A counterfactual dataset of identical checkpoints continued with alternative models.</p></article>
+          <article><span>04</span><p>A practical supervised router and a constrained sequential formulation.</p></article>
+          <article><span>05</span><p>An episode-level evaluation protocol covering success, cost, latency, handoff, and oracle regret.</p></article>
+          <article><span>06</span><p>Evidence showing when learned routing is—or is not—better than simple escalation rules.</p></article>
+        </div>
+      </section>
+
+      <section class="section section-light sources" id="sources">
+        <div class="section-heading reveal">
+          <span class="section-number">11</span>
+          <div>
+            <p class="kicker">Primary research links</p>
+            <h2>Grounded in papers, code, and released datasets.</h2>
+          </div>
+        </div>
+        <div class="source-list reveal">
+          <a href="https://arxiv.org/abs/2508.21141" target="_blank" rel="noreferrer"><span>2025</span><strong>Adaptive LLM Routing under Budget Constraints</strong><small>PILOT · contextual bandits</small><i>↗</i></a>
+          <a href="https://arxiv.org/abs/2310.12963" target="_blank" rel="noreferrer"><span>2023</span><strong>AutoMix: Automatically Mixing Language Models</strong><small>POMDP · self-verification</small><i>↗</i></a>
+          <a href="https://proceedings.neurips.cc/paper_files/paper/2024/hash/a6deba3b2408af45b3f9994c2152b862-Abstract-Conference.html" target="_blank" rel="noreferrer"><span>2024</span><strong>Efficient Contextual LLM Cascades</strong><small>TREACLE · constrained policy learning</small><i>↗</i></a>
+          <a href="https://arxiv.org/abs/2410.10347" target="_blank" rel="noreferrer"><span>2024</span><strong>A Unified Approach to Routing and Cascading for LLMs</strong><small>Theory · optimal cascade routing</small><i>↗</i></a>
+          <a href="https://arxiv.org/abs/2506.09033" target="_blank" rel="noreferrer"><span>2025</span><strong>Router-R1</strong><small>Multi-round routing and aggregation</small><i>↗</i></a>
+          <a href="https://arxiv.org/abs/2604.23530" target="_blank" rel="noreferrer"><span>2026</span><strong>MTRouter</strong><small>History-model joint embeddings</small><i>↗</i></a>
+          <a href="https://arxiv.org/abs/2605.18859" target="_blank" rel="noreferrer"><span>2026</span><strong>TwinRouterBench</strong><small>Static labels + live dynamic evaluation</small><i>↗</i></a>
+          <a href="https://arxiv.org/abs/2607.00053" target="_blank" rel="noreferrer"><span>2026</span><strong>SWE-Router</strong><small>Partial-trajectory escalation</small><i>↗</i></a>
+          <a href="https://arxiv.org/abs/2608.15817" target="_blank" rel="noreferrer"><span>2026</span><strong>RLCascadeRouter</strong><small>Quality-estimator-free cascade RL</small><i>↗</i></a>
+          <a href="https://arxiv.org/abs/2609.22951" target="_blank" rel="noreferrer"><span>2026</span><strong>AgentRouter</strong><small>Step-level heterogeneous routing</small><i>↗</i></a>
+          <a href="https://github.com/ynulihao/LLMRouterBench" target="_blank" rel="noreferrer"><span>Code</span><strong>LLMRouterBench</strong><small>Benchmark and unified data framework</small><i>↗</i></a>
+          <a href="https://github.com/CommonstackAI/TwinRouterBench" target="_blank" rel="noreferrer"><span>Code</span><strong>TwinRouterBench repository</strong><small>Data pipeline and live SWE harness</small><i>↗</i></a>
+        </div>
+        <p class="reviewed reveal">Research links reviewed 8 October 2026.</p>
+      </section>
+    </main>
+
+    <footer>
+      <div>
+        <span class="brand-mark" aria-hidden="true">CR</span>
+        <p><strong>CheckpointRouter</strong><br />Selective model routing for long-horizon agents.</p>
+      </div>
+      <div class="footer-links">
+        <a href="https://github.com/cs24mtech15016-oss/ai-gateway-ops" target="_blank" rel="noreferrer">Repository ↗</a>
+        <a href="#top">Back to top ↑</a>
+      </div>
+    </footer>
+  </body>
+</html>

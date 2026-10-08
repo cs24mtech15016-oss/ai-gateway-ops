@@ -1,5 +1,11 @@
 # ai-gateway-ops
 
+> **Research site:** [CheckpointRouter — selective model routing for long-horizon agents](https://cs24mtech15016-oss.github.io/ai-gateway-ops/)
+
+This repository also hosts a grounded research proposal for deciding **when** an agent
+should reconsider its model and **which model** should execute the next phase. The static,
+dependency-free site lives in [`docs/`](docs/) and is deployed through GitHub Pages.
+
 A self-hosted LLM gateway: [**LiteLLM**](https://docs.litellm.ai) as the OpenAI-compatible
 front door, routing to open-weight models served locally by [**Ollama**](https://ollama.com)
 on Apple Silicon (Metal GPU).
