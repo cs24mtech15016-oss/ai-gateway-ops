@@ -5,13 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta
       name="description"
-      content="CheckpointRouter is a research proposal for selective, cost-aware model routing in long-horizon AI agents."
+      content="CheckpointRouter is a research proposal for checkpoint-aware model, context-tier, and sub-agent routing in long-horizon AI systems."
     />
     <meta name="theme-color" content="#111714" />
     <meta property="og:title" content="CheckpointRouter" />
     <meta
       property="og:description"
-      content="Selective, episode-aware model routing for long-horizon agents."
+      content="Selective model, context, and sub-agent routing for long-horizon systems."
     />
     <meta property="og:type" content="website" />
     <title>CheckpointRouter — Long-Horizon Agent Routing</title>
@@ -30,6 +30,7 @@
       </a>
       <nav class="desktop-nav" aria-label="Primary navigation">
         <a href="#premise">Premise</a>
+        <a href="#gap">Gap</a>
         <a href="#prior-art">Prior art</a>
         <a href="#method">Method</a>
         <a href="#evaluation">Evaluation</a>
@@ -56,18 +57,18 @@
               <em>that actually matter.</em>
             </h1>
             <p class="hero-lede">
-              CheckpointRouter studies when an agent should reconsider its model—not only which
-              model to choose. It uses execution evidence, terminal outcomes, and resource budgets
-              to make selective routing decisions across a long-running task.
+              CheckpointRouter studies when a long-running system should change its execution
+              plan—and which model, context tier, and reasoning budget should power the coordinator
+              or each spawned sub-agent. Decisions use execution evidence and optimize the whole episode.
             </p>
             <div class="hero-actions">
               <a class="button button-primary" href="#research-statement">Read the proposal</a>
               <a class="button button-secondary" href="#prior-art">Explore the evidence</a>
             </div>
             <dl class="hero-facts" aria-label="Research scope">
-              <div><dt>Decision unit</dt><dd>Execution checkpoint</dd></div>
+              <div><dt>Decision unit</dt><dd>Checkpoint + sub-agent</dd></div>
               <div><dt>Primary outcome</dt><dd>Episode success</dd></div>
-              <div><dt>Formal model</dt><dd>Constrained SMDP</dd></div>
+              <div><dt>Action</dt><dd>Model × context × budget</dd></div>
             </dl>
           </div>
 
@@ -162,7 +163,7 @@
           <span class="section-number">02</span>
           <div>
             <p class="kicker">Problem</p>
-            <h2>Two decisions, one delayed outcome.</h2>
+            <h2>A coupled decision with a delayed outcome.</h2>
           </div>
         </div>
 
@@ -178,12 +179,12 @@
           </article>
           <article class="decision-card decision-card-accent">
             <span class="decision-label">Decision B</span>
-            <h3>Which model should take over?</h3>
+            <h3>What execution team should continue?</h3>
             <p>
-              Select the continuation whose expected terminal success is worth its remaining cost,
-              latency, and switching risk.
+              Continue centrally, switch the coordinator, or spawn a sub-agent; then assign every
+              active role a model, context tier, and reasoning budget.
             </p>
-            <code>action(s) ∈ { continue, escalate, switch, replan }</code>
+            <code>action(s) = graph × model × context × budget</code>
           </article>
         </div>
 
@@ -210,13 +211,14 @@
         <div class="statement-card reveal">
           <p class="kicker">Research statement</p>
           <blockquote>
-            How can a long-horizon agent determine <em>when</em> model selection should be
-            reconsidered and <em>which model</em> should execute the next phase, given its execution
-            history, environment state, observed progress, failures, and remaining resources?
+            How can a long-horizon system determine <em>when</em> to revise its execution graph and
+            <em>which model–context configuration</em> should power each continuing or newly spawned
+            agent, given shared state, local histories, progress, failures, dependencies, and budget?
           </blockquote>
           <p>
             The objective is to preserve frontier-model task completion while reducing total
-            episode cost and latency—and while avoiding routing decisions that add no value.
+            episode cost and latency—including coordination and context-transfer overhead—while
+            avoiding routing or delegation decisions that add no value.
           </p>
         </div>
       </section>
@@ -285,6 +287,32 @@
             <span class="prior-gap">Often local labels or every-call decisions</span>
           </article>
           <article>
+            <div class="prior-stage">Team</div>
+            <div class="prior-body">
+              <h3>Dynamic and heterogeneous agent teams</h3>
+              <p>
+                <a href="https://arxiv.org/abs/2310.02170" target="_blank" rel="noreferrer">DyLAN</a>
+                selects agent teams, while
+                <a href="https://arxiv.org/abs/2502.04510" target="_blank" rel="noreferrer">Heterogeneous Swarms</a>
+                jointly optimizes model roles and a collaboration DAG.
+              </p>
+            </div>
+            <span class="prior-gap">Usually task-level or offline graph optimization</span>
+          </article>
+          <article>
+            <div class="prior-stage">Context</div>
+            <div class="prior-body">
+              <h3>Short/long context routing</h3>
+              <p>
+                <a href="https://arxiv.org/abs/2603.17280" target="_blank" rel="noreferrer">FleetOpt</a>
+                routes requests across serving pools with different effective context windows;
+                <a href="https://arxiv.org/abs/2307.03172" target="_blank" rel="noreferrer">Lost in the Middle</a>
+                shows that a longer context is not automatically better used.
+              </p>
+            </div>
+            <span class="prior-gap">Infrastructure or recall, not agent assignment</span>
+          </article>
+          <article>
             <div class="prior-stage">Sequence</div>
             <div class="prior-body">
               <h3>Sequential routing and cascading</h3>
@@ -303,17 +331,89 @@
         <aside class="honesty-note reveal">
           <strong>Defensible positioning</strong>
           <p>
-            The research gap is not “routing during long-horizon tasks.” It is the joint study of
-            <b>selective checkpoint timing</b>, <b>episode-level action value</b>,
-            <b>counterfactual continuation from the same environment state</b>, and
-            <b>handoff cost</b>.
+            The research gap is not “routing during long-horizon tasks” or “using multiple agents.”
+            Both already exist. The narrower claim is joint, event-triggered control of
+            <b>when the execution graph changes</b> and <b>which model–context pair powers each
+            agent</b>, trained and judged by terminal episode outcomes with explicit handoff cost.
           </p>
         </aside>
       </section>
 
-      <section class="section section-accent" id="opportunity">
+      <section class="section section-paper" id="gap">
         <div class="section-heading reveal">
           <span class="section-number">04</span>
+          <div>
+            <p class="kicker">The exact gap</p>
+            <h2>Existing systems optimize slices. The episode couples them.</h2>
+            <p class="section-intro">
+              Model routing, context-pool routing, and multi-agent orchestration are established
+              research areas. What remains underexplored is a single controller that makes these
+              choices together as new evidence arrives inside a persistent tool-using episode.
+            </p>
+          </div>
+        </div>
+
+        <div class="gap-matrix reveal" role="table" aria-label="Research gap by decision axis">
+          <div class="gap-row gap-head" role="row">
+            <span role="columnheader">Decision axis</span>
+            <span role="columnheader">Closest prior art</span>
+            <span role="columnheader">Unresolved question</span>
+          </div>
+          <div class="gap-row" role="row">
+            <strong role="cell">When</strong>
+            <p role="cell">Prompt-only, fixed prefix, or every workflow step</p>
+            <p role="cell">Can the controller open decisions only at information-bearing events?</p>
+          </div>
+          <div class="gap-row" role="row">
+            <strong role="cell">Who works</strong>
+            <p role="cell">Static roles, task-level team selection, or an offline-optimized DAG</p>
+            <p role="cell">Should the coordinator continue, spawn, stop, retry, or merge a sub-agent now?</p>
+          </div>
+          <div class="gap-row" role="row">
+            <strong role="cell">Which compute</strong>
+            <p role="cell">A model tier, reasoning budget, or context pool chosen separately</p>
+            <p role="cell">Which model × context tier × budget is adequate for each active role?</p>
+          </div>
+          <div class="gap-row" role="row">
+            <strong role="cell">What state</strong>
+            <p role="cell">Opening prompt, local step features, or a preliminary team trial</p>
+            <p role="cell">How should global state, local agent history, dependencies, and context occupancy combine?</p>
+          </div>
+          <div class="gap-row" role="row">
+            <strong role="cell">What objective</strong>
+            <p role="cell">Call accuracy, step labels, task utility, or serving throughput</p>
+            <p role="cell">Which joint action maximizes terminal success under total cost, latency, and reliability limits?</p>
+          </div>
+          <div class="gap-row" role="row">
+            <strong role="cell">How credited</strong>
+            <p role="cell">Independent labels or one observed trajectory</p>
+            <p role="cell">How can delayed success be attributed when delegation and model choices interact?</p>
+          </div>
+        </div>
+
+        <div class="gap-claim reveal">
+          <article>
+            <span>Novel hypothesis</span>
+            <p>
+              A sparse controller that assigns <code>(model, context tier, reasoning budget)</code>
+              when it changes the agent graph will produce a better episode-level success–cost–latency
+              frontier than prompt-only, per-step, or static role–model allocation.
+            </p>
+          </article>
+          <article>
+            <span>Clear falsifier</span>
+            <p>
+              If a fixed role–model table or simple rule-based escalation policy matches the learned
+              controller after all routing, context transfer, and coordination costs are counted,
+              the joint router is not operationally justified.
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section section-accent" id="opportunity">
+        <div class="section-heading reveal">
+          <span class="section-number">05</span>
           <div>
             <p class="kicker">Research opportunity</p>
             <h2>From next-response quality to remaining-episode value.</h2>
@@ -321,15 +421,24 @@
         </div>
         <div class="opportunity-grid reveal">
           <article><span>01</span><h3>Checkpoint discovery</h3><p>Compare fixed-turn, event-triggered, phase-aware, and learned decisions.</p></article>
-          <article><span>02</span><h3>Long-term value</h3><p>Predict terminal success and remaining resources, not isolated response quality.</p></article>
-          <article><span>03</span><h3>Counterfactual branches</h3><p>Restore identical states and continue with alternative models to estimate marginal value.</p></article>
-          <article><span>04</span><h3>Handoff-aware control</h3><p>Measure history transfer, replanning, cache loss, inconsistency, and switching latency.</p></article>
+          <article><span>02</span><h3>Model × context pool</h3><p>Treat capability and usable context as separate axes; choose the smallest sufficient context tier, not automatically the longest.</p></article>
+          <article><span>03</span><h3>Sub-agent assignment</h3><p>At spawn time, match explorer, coder, reviewer, or verifier roles to a model, context packet, and budget.</p></article>
+          <article><span>04</span><h3>Global episode value</h3><p>Predict terminal success and remaining resources across interacting agents, not isolated response quality.</p></article>
+          <article><span>05</span><h3>Counterfactual branches</h3><p>Restore identical checkpoints and vary graph, model, or context assignment to estimate marginal value.</p></article>
+          <article><span>06</span><h3>Coordination-aware control</h3><p>Measure context transfer, parallelism, merge delay, duplicate work, inconsistency, cache loss, and replanning.</p></article>
         </div>
+        <p class="context-note reveal">
+          <b>Important distinction:</b> for hosted APIs, the maximum context window is mainly a
+          feasibility constraint while actual input tokens drive price. For self-hosted fleets,
+          configured context capacity also changes KV-cache concurrency and energy efficiency.
+          The study should therefore log both <em>model capability</em> and <em>context allocation</em>
+          instead of treating “long-context model” as a single quality tier.
+        </p>
       </section>
 
       <section class="section section-dark" id="formalization">
         <div class="section-heading reveal">
-          <span class="section-number">05</span>
+          <span class="section-number">06</span>
           <div>
             <p class="kicker">Formalization</p>
             <h2>A constrained semi-Markov decision process.</h2>
@@ -337,7 +446,7 @@
         </div>
         <div class="formula-layout reveal">
           <div class="formula-main">
-            <p class="formula-label">Primary objective</p>
+            <p class="formula-label">Episode objective</p>
             <div class="formula">max<sub>π</sub> E<sub>π</sub>[Y]</div>
             <div class="constraints">
               <span>subject to</span>
@@ -345,26 +454,34 @@
               <code>E<sub>π</sub>[L] ≤ B<sub>L</sub></code>
             </div>
             <p>
-              <b>Y</b> is terminal success, <b>C</b> is total episode cost, <b>L</b> is total
-              latency, and <b>π</b> is the routing policy. The interval between checkpoints varies,
-              which makes the natural formulation semi-Markov.
+              <b>Y</b> is terminal success, <b>C</b> is total cost across all agents, <b>L</b> is
+              wall-clock latency, and <b>π</b> is the controller. Variable time between events and
+              parallel sub-agent execution make this a constrained semi-Markov control problem.
             </p>
           </div>
           <div class="formula-side">
-            <p class="formula-label">Practical action score</p>
+            <p class="formula-label">Joint action at checkpoint k</p>
+            <div class="joint-action">a<sub>k</sub> = (g<sub>k</sub>, {m<sub>i</sub>, w<sub>i</sub>, b<sub>i</sub>}, h<sub>k</sub>)</div>
             <div class="score-lines">
-              <code>Q<sub>Y</sub>(s,a)</code><span>eventual success</span>
-              <code>− λ<sub>C</sub>Q<sub>C</sub>(s,a)</code><span>remaining cost</span>
-              <code>− λ<sub>L</sub>Q<sub>L</sub>(s,a)</code><span>remaining latency</span>
-              <code>− λ<sub>S</sub>Q<sub>S</sub>(s,a)</code><span>handoff penalty</span>
+              <code>g<sub>k</sub></code><span>continue, spawn, stop, retry, or merge agents</span>
+              <code>m<sub>i</sub></code><span>model assigned to active agent i</span>
+              <code>w<sub>i</sub></code><span>context tier and selected context packet</span>
+              <code>b<sub>i</sub></code><span>reasoning, token, and tool-call budget</span>
+              <code>h<sub>k</sub></code><span>handoff / aggregation policy</span>
             </div>
           </div>
         </div>
+        <p class="state-definition reveal">
+          <b>State:</b> <code>s<sub>k</sub></code> combines the shared environment snapshot, task graph,
+          global budget, active-agent states, local histories, context occupancy, progress and failure
+          signals, and uncertainty. The action is joint because changing one worker changes the
+          information and budget available to the rest of the team.
+        </p>
       </section>
 
       <section class="section section-light" id="method">
         <div class="section-heading reveal">
-          <span class="section-number">06</span>
+          <span class="section-number">07</span>
           <div>
             <p class="kicker">Method</p>
             <h2>Branch, measure, learn, and evaluate end to end.</h2>
@@ -398,29 +515,29 @@
             </ul>
           </article>
           <article>
-            <span class="phase-tag">Phase 2 · evidence</span>
-            <h3>Counterfactual dataset</h3>
+            <span class="phase-tag">Phase 2 · core study</span>
+            <h3>Context-aware sub-agents</h3>
             <p>
-              Generate alternative continuations from restorable checkpoints and quantify the
-              marginal value of escalation under identical starting conditions.
+              Add a coordinator with at most two spawnable workers. At spawn, choose the role,
+              model tier, compact or expanded context packet, and execution budget.
             </p>
             <ul>
-              <li>Terminal success as the primary target</li>
-              <li>Cost, latency, tool calls, and recovery as secondary targets</li>
-              <li>Repository- and task-family splits</li>
+              <li>Independent capability and context-size ablations</li>
+              <li>Events: phase boundary, context pressure, failure, and merge</li>
+              <li>Measure useful work versus duplicate coordination work</li>
             </ul>
           </article>
           <article>
-            <span class="phase-tag">Phase 3 · extension</span>
-            <h3>Selective sequential policy</h3>
+            <span class="phase-tag">Phase 3 · learn</span>
+            <h3>Counterfactual joint policy</h3>
             <p>
-              Add learned checkpoint timing, multiple model tiers, de-escalation, and alternative
-              handoffs only after the simple system demonstrates value.
+              Branch restorable checkpoints across graph, model, and context assignments; learn
+              calibrated outcome and resource predictors only after simple baselines show headroom.
             </p>
             <ul>
-              <li>Explicit switching penalties</li>
-              <li>Offline constrained RL as an optional extension</li>
-              <li>Safe shadow evaluation before live control</li>
+              <li>Terminal success as the primary target</li>
+              <li>Repository- and task-family splits</li>
+              <li>Offline constrained RL remains optional</li>
             </ul>
           </article>
         </div>
@@ -428,7 +545,7 @@
 
       <section class="section section-paper" id="data">
         <div class="section-heading reveal">
-          <span class="section-number">07</span>
+          <span class="section-number">08</span>
           <div>
             <p class="kicker">Grounding data</p>
             <h2>Public artifacts make a rigorous prototype possible.</h2>
@@ -448,13 +565,14 @@
         <p class="data-caveat reveal">
           <b>Important limitation:</b> logged trajectories reveal only the selected action. Reliable
           causal comparison needs randomized action propensities, counterfactual branches, or careful
-          off-policy estimators. A large trace corpus is not automatically a routing dataset.
+          off-policy estimators. Existing corpora rarely vary agent topology, model assignment, and
+          context packet from the same checkpoint; that missing factorial evidence is part of the contribution.
         </p>
       </section>
 
       <section class="section section-dark" id="evaluation">
         <div class="section-heading reveal">
-          <span class="section-number">08</span>
+          <span class="section-number">09</span>
           <div>
             <p class="kicker">Evaluation</p>
             <h2>Judge the episode, not the classification label.</h2>
@@ -468,8 +586,10 @@
               <li><span>02</span>Prompt-only router</li>
               <li><span>03</span>Fixed early escalation</li>
               <li><span>04</span>Rule-based event escalation</li>
-              <li><span>05</span>Independent per-call router</li>
-              <li><span>06</span>Checkpoint oracle from available branches</li>
+              <li><span>05</span>Static role–model–context table</li>
+              <li><span>06</span>AgentRouter-style independent step router</li>
+              <li><span>07</span>Static or task-level optimized agent graph</li>
+              <li><span>08</span>Checkpoint oracle from available joint branches</li>
             </ol>
           </div>
           <div>
@@ -479,8 +599,10 @@
               <article><strong>Cost</strong><span>Total and per successful task</span></article>
               <article><strong>Latency</strong><span>Wall-clock episode duration</span></article>
               <article><strong>Switches</strong><span>Frequency and handoff overhead</span></article>
-              <article><strong>Calibration</strong><span>Accuracy of predicted success</span></article>
-              <article><strong>Regret</strong><span>Distance from checkpoint oracle</span></article>
+              <article><strong>Context</strong><span>Tokens allocated, retained, and actually used</span></article>
+              <article><strong>Coordination</strong><span>Spawn, merge, wait, and duplicate-work overhead</span></article>
+              <article><strong>Calibration</strong><span>Accuracy of predicted episode success</span></article>
+              <article><strong>Regret</strong><span>Distance from the joint checkpoint oracle</span></article>
             </div>
           </div>
         </div>
@@ -492,7 +614,7 @@
 
       <section class="section section-light" id="feasibility">
         <div class="section-heading reveal">
-          <span class="section-number">09</span>
+          <span class="section-number">10</span>
           <div>
             <p class="kicker">Feasibility</p>
             <h2>The router is cheap. The evidence is expensive.</h2>
@@ -503,9 +625,9 @@
             <span>Practical</span>
             <h3>A focused first study</h3>
             <ul>
-              <li>Two model tiers</li>
-              <li>Three event checkpoints</li>
-              <li>Monotonic escalation</li>
+              <li>Two model tiers and two context tiers</li>
+              <li>One coordinator and at most two workers</li>
+              <li>Four event-triggered decision types</li>
               <li>Supervised value prediction</li>
               <li>Small millisecond-scale router</li>
             </ul>
@@ -514,9 +636,9 @@
             <span>Not practical initially</span>
             <h3>A complete policy tree</h3>
             <ul>
-              <li>Branching every agent turn</li>
-              <li>All models at every checkpoint</li>
-              <li>Unrestricted switching and restart</li>
+              <li>Unbounded agent spawning</li>
+              <li>All model × context × graph combinations</li>
+              <li>Unrestricted switching, restarts, and merges</li>
               <li>Online reinforcement learning</li>
               <li>Claims without live episode evaluation</li>
             </ul>
@@ -531,35 +653,35 @@
         <aside class="honest-answer reveal">
           <strong>Most honest expectation</strong>
           <p>
-            A calibrated two-model escalation router is likely practical. A multi-model CMDP may be
-            academically interesting but unnecessary. The strongest competitor may be a simple rule:
-            escalate after failed tests, repetition, or stalled progress. The learned router must beat
-            that rule materially—not just statistically—to justify operational complexity.
+            A bounded coordinator–worker study is practical; a fully general graph controller is not.
+            The strongest competitor may be a static table: strong model for planning/review, cheap
+            short-context model for scoped workers, and escalation after failed tests. The learned
+            router must beat that policy materially after coordination overhead—not just statistically.
           </p>
         </aside>
       </section>
 
       <section class="section section-accent" id="contributions">
         <div class="section-heading reveal">
-          <span class="section-number">10</span>
+          <span class="section-number">11</span>
           <div>
             <p class="kicker">Expected contributions</p>
             <h2>A useful result, whether the router wins or not.</h2>
           </div>
         </div>
         <div class="contribution-list reveal">
-          <article><span>01</span><p>A formal definition of selective checkpoint routing for long-horizon agents.</p></article>
-          <article><span>02</span><p>A taxonomy and detector for progress-, phase-, failure-, and budget-sensitive checkpoints.</p></article>
-          <article><span>03</span><p>A counterfactual dataset of identical checkpoints continued with alternative models.</p></article>
-          <article><span>04</span><p>A practical supervised router and a constrained sequential formulation.</p></article>
-          <article><span>05</span><p>An episode-level evaluation protocol covering success, cost, latency, handoff, and oracle regret.</p></article>
-          <article><span>06</span><p>Evidence showing when learned routing is—or is not—better than simple escalation rules.</p></article>
+          <article><span>01</span><p>A formal definition of selective graph-and-resource routing for long-horizon agent systems.</p></article>
+          <article><span>02</span><p>A taxonomy and detector for progress-, phase-, failure-, context-, and budget-sensitive checkpoints.</p></article>
+          <article><span>03</span><p>A counterfactual dataset varying sub-agent graph, model tier, and context allocation from identical states.</p></article>
+          <article><span>04</span><p>A bounded supervised controller and a constrained multi-agent semi-Markov formulation.</p></article>
+          <article><span>05</span><p>An episode evaluation protocol covering success, total cost, latency, context waste, coordination, and regret.</p></article>
+          <article><span>06</span><p>Evidence showing when learned joint routing is—or is not—better than static assignments and simple rules.</p></article>
         </div>
       </section>
 
       <section class="section section-light sources" id="sources">
         <div class="section-heading reveal">
-          <span class="section-number">11</span>
+          <span class="section-number">12</span>
           <div>
             <p class="kicker">Primary research links</p>
             <h2>Grounded in papers, code, and released datasets.</h2>
@@ -576,6 +698,12 @@
           <a href="https://arxiv.org/abs/2607.00053" target="_blank" rel="noreferrer"><span>2026</span><strong>SWE-Router</strong><small>Partial-trajectory escalation</small><i>↗</i></a>
           <a href="https://arxiv.org/abs/2608.15817" target="_blank" rel="noreferrer"><span>2026</span><strong>RLCascadeRouter</strong><small>Quality-estimator-free cascade RL</small><i>↗</i></a>
           <a href="https://arxiv.org/abs/2609.22951" target="_blank" rel="noreferrer"><span>2026</span><strong>AgentRouter</strong><small>Step-level heterogeneous routing</small><i>↗</i></a>
+          <a href="https://arxiv.org/abs/2603.20895" target="_blank" rel="noreferrer"><span>2026</span><strong>LLM Router: Rethinking Routing with Prefill Activations</strong><small>Activation-based model correctness prediction</small><i>↗</i></a>
+          <a href="https://sqwish.ai/blog/how-we-accidentally-trained-the-1-model-router" target="_blank" rel="noreferrer"><span>Report</span><strong>How We Accidentally Trained the World's #1 Model Router</strong><small>Model fingerprints, budgets, uncertainty, and agent opportunity</small><i>↗</i></a>
+          <a href="https://arxiv.org/abs/2310.02170" target="_blank" rel="noreferrer"><span>2024</span><strong>DyLAN</strong><small>Dynamic team selection and agent collaboration</small><i>↗</i></a>
+          <a href="https://arxiv.org/abs/2502.04510" target="_blank" rel="noreferrer"><span>2025</span><strong>Heterogeneous Swarms</strong><small>Joint multi-model role and graph optimization</small><i>↗</i></a>
+          <a href="https://arxiv.org/abs/2603.17280" target="_blank" rel="noreferrer"><span>2026</span><strong>The 1/W Law</strong><small>Short/long context serving-pool efficiency</small><i>↗</i></a>
+          <a href="https://arxiv.org/abs/2307.03172" target="_blank" rel="noreferrer"><span>2023</span><strong>Lost in the Middle</strong><small>Limits of effective long-context use</small><i>↗</i></a>
           <a href="https://github.com/ynulihao/LLMRouterBench" target="_blank" rel="noreferrer"><span>Code</span><strong>LLMRouterBench</strong><small>Benchmark and unified data framework</small><i>↗</i></a>
           <a href="https://github.com/CommonstackAI/TwinRouterBench" target="_blank" rel="noreferrer"><span>Code</span><strong>TwinRouterBench repository</strong><small>Data pipeline and live SWE harness</small><i>↗</i></a>
         </div>
