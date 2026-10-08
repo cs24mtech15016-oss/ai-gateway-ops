@@ -250,6 +250,20 @@
             <span class="prior-gap">No evolving environment state</span>
           </article>
           <article>
+            <div class="prior-stage">Prefill</div>
+            <div class="prior-body">
+              <h3>Activation-based single-pass routing</h3>
+              <p>
+                <a href="https://arxiv.org/abs/2603.20895" target="_blank" rel="noreferrer">LLM Router</a>
+                and the
+                <a href="https://sqwish.ai/blog/how-we-accidentally-trained-the-1-model-router" target="_blank" rel="noreferrer">Sqwish router</a>
+                extract task-difficulty signals from a small encoder's prefill state and predict
+                outcomes for candidate model–budget pairs.
+              </p>
+            </div>
+            <span class="prior-gap">Strong representation; still opening-request evidence</span>
+          </article>
+          <article>
             <div class="prior-stage">Prefix</div>
             <div class="prior-body">
               <h3>Partial-trajectory escalation</h3>
@@ -409,6 +423,99 @@
             </p>
           </article>
         </div>
+
+        <div class="horizon-heading reveal">
+          <p class="kicker">Why local routers break over a horizon</p>
+          <h3>Long-horizon routing is a causal control problem, not repeated classification.</h3>
+          <p>
+            Calling a one-shot router at every turn does not make it sequentially optimal. Each
+            choice changes what the agent observes, edits, remembers, and can recover from next.
+          </p>
+        </div>
+        <div class="horizon-grid reveal">
+          <article>
+            <span>01 · Observation aliasing</span>
+            <h4>The prompt hides future difficulty.</h4>
+            <p>
+              Similar requests can lead to a typo fix or a cross-module refactor. SWE-Router proves
+              an opening-prompt Bayes-error floor when exploratory evidence is informative.
+            </p>
+          </article>
+          <article>
+            <span>02 · Myopic labels</span>
+            <h4>A good next response can harm the episode.</h4>
+            <p>
+              Per-call correctness misses whether an action preserves a viable plan, creates
+              recoverable state, or causes an irreversible tool-side effect.
+            </p>
+          </article>
+          <article>
+            <span>03 · Policy-induced shift</span>
+            <h4>The route changes the data seen later.</h4>
+            <p>
+              A weak model and strong model explore different files, call different tools, and
+              create different future states. Logged trajectories from one policy are not neutral labels for another.
+            </p>
+          </article>
+          <article>
+            <span>04 · Delayed credit</span>
+            <h4>Success arrives after many coupled choices.</h4>
+            <p>
+              A final test result cannot directly identify which earlier routing, context, or
+              delegation decision caused success or failure; step supervision can reward plausible detours.
+            </p>
+          </article>
+          <article>
+            <span>05 · Counterfactual explosion</span>
+            <h4>The oracle grows exponentially.</h4>
+            <p>
+              With M model choices across K path-dependent checkpoints there are up to M<sup>K</sup>
+              schedules—before context tiers, budgets, and sub-agent graph choices are added.
+            </p>
+          </article>
+          <article>
+            <span>06 · Handoff loss</span>
+            <h4>Models do not share internal state.</h4>
+            <p>
+              Switching may lose KV-cache reuse, tacit plan state, local attention, or details removed
+              by summarization. Token price alone understates the cost of a handoff.
+            </p>
+          </article>
+          <article>
+            <span>07 · Team externalities</span>
+            <h4>Sub-agent assignments are not independent.</h4>
+            <p>
+              One worker's scope changes another's useful context; parallel calls alter the latency
+              critical path, and duplicate exploration can erase savings from cheaper models.
+            </p>
+          </article>
+          <article>
+            <span>08 · Routing churn</span>
+            <h4>More decisions can be worse.</h4>
+            <p>
+              Routing every call adds compute and switching opportunities. MTRouter's fewer switches
+              and tolerance of transient errors indicate that commitment duration is itself a decision.
+            </p>
+          </article>
+          <article>
+            <span>09 · Evaluation mismatch</span>
+            <h4>Static tables cannot replay consequences.</h4>
+            <p>
+              LLMRouterBench reveals complementarity on one-shot data, but TwinRouterBench shows why
+              live execution is needed to test whether a downgrade preserves downstream success.
+            </p>
+          </article>
+        </div>
+        <aside class="closest-work reveal">
+          <strong>What the strongest prior art already solves</strong>
+          <p>
+            MTRouter conditions on history at each turn; SWE-Router waits for an informative prefix;
+            AgentRouter selects a tier per workflow step; TwinRouterBench evaluates full live runs;
+            and Router-R1 learns multi-round model invocation and aggregation. The remaining opening
+            is narrower: <b>learn when to reconsider</b>, support persistent tool state and sub-agent
+            graph changes, assign model and context jointly, and estimate value over the remaining episode.
+          </p>
+        </aside>
       </section>
 
       <section class="section section-accent" id="opportunity">
@@ -688,6 +795,9 @@
           </div>
         </div>
         <div class="source-list reveal">
+          <a href="https://arxiv.org/abs/2406.18665" target="_blank" rel="noreferrer"><span>2024</span><strong>RouteLLM</strong><small>Single-pass strong/weak model routing</small><i>↗</i></a>
+          <a href="https://arxiv.org/abs/2305.05176" target="_blank" rel="noreferrer"><span>2023</span><strong>FrugalGPT</strong><small>Learned LLM cascades</small><i>↗</i></a>
+          <a href="https://arxiv.org/abs/2601.07206" target="_blank" rel="noreferrer"><span>2026</span><strong>LLMRouterBench</strong><small>400K+ one-shot routing records and unified baselines</small><i>↗</i></a>
           <a href="https://arxiv.org/abs/2508.21141" target="_blank" rel="noreferrer"><span>2025</span><strong>Adaptive LLM Routing under Budget Constraints</strong><small>PILOT · contextual bandits</small><i>↗</i></a>
           <a href="https://arxiv.org/abs/2310.12963" target="_blank" rel="noreferrer"><span>2023</span><strong>AutoMix: Automatically Mixing Language Models</strong><small>POMDP · self-verification</small><i>↗</i></a>
           <a href="https://proceedings.neurips.cc/paper_files/paper/2024/hash/a6deba3b2408af45b3f9994c2152b862-Abstract-Conference.html" target="_blank" rel="noreferrer"><span>2024</span><strong>Efficient Contextual LLM Cascades</strong><small>TREACLE · constrained policy learning</small><i>↗</i></a>
