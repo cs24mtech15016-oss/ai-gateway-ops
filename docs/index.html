@@ -304,19 +304,22 @@
       <section class="section section-dark" id="formalization">
         <div class="section-heading reveal"><span class="section-number">05</span><div>
           <p class="kicker">Mathematics</p><h2>One episode objective. A phased action space.</h2>
-          <p class="section-intro">The router observes the execution so far, chooses an allocation, and learns from what happens afterward. The notation separates observable inputs, decisions, and future outcomes; the latter are predicted, not known at decision time.</p>
+          <p class="section-intro">The same argument as <a href="#gap">Section 4</a>: execution evidence (H, r) → a feasible allocation (a) → whole-episode outcomes (Y, C, L). The primary objective is cheaper execution with preserved completion; checkpoint value estimates help choose actions, but do not certify that objective.</p>
         </div></div>
         <div class="formula-layout reveal">
           <article class="formula-main">
-            <span class="formula-label">Episode objective</span><div class="formula">max<sub>π</sub> E[Y]</div>
-            <div class="constraints"><span>subject to</span><code>E[C] ≤ B<sub>C</sub></code><code>E[L] ≤ B<sub>L</sub></code></div>
-            <p><b>In words:</b> choose a routing policy π that maximizes the probability of completing the task, while keeping average total cost and wall time within declared budgets. Count the coordinator, workers, routing, handoffs, coordination, and failed attempts. Average constraints are separate from harness-enforced per-episode spend and deadline caps.</p>
+            <span class="formula-label">Primary episode objective</span><div class="formula">min<sub>π</sub> E<sub>π</sub>[C]</div>
+            <div class="constraints"><span>subject to</span><code>E<sub>π</sub>[Y] ≥ p<sub>ref</sub> − ε</code><code>E<sub>π</sub>[L] ≤ B<sub>L</sub></code></div>
+            <p><b>In words:</b> minimize average total deployment cost while retaining the reference policy’s task-completion rate within a predeclared margin ε and staying within an average latency budget. This is the operating point in Sections 4 and 8, not a separate success-maximization objective.</p>
+            <p class="formula-explanation">Count prefix execution, coordinator/workers, routing, handoffs, coordination, and failed attempts. Declare the reference policy, margin, and latency budget before test evaluation. These population constraints are distinct from runtime-enforced per-episode spend/deadline caps. If no policy meets them, report infeasibility rather than relaxing the target after seeing test results.</p>
           </article>
           <article class="formula-side">
             <span class="formula-label">Checkpoint allocation</span>
             <div class="math-line">gate(H<sub>t</sub>, r<sub>t</sub>) ∈ { hold, revise }</div>
+            <div class="math-line">a<sub>t</sub> ∈ F(H<sub>t</sub>, r<sub>t</sub>)</div>
             <div class="math-line">a<sub>t</sub> = (g<sub>t</sub>, { (m<sub>i</sub>, κ<sub>i</sub>, b<sub>i</sub>) }<sub>i ∈ A(g<sub>t</sub>)</sub>)</div>
-            <p class="formula-explanation"><b>In words:</b> at decision t, use the observed history and remaining resources to keep the allocation or revise it. A revision specifies a bounded execution graph and gives each active role a model, context configuration, and generation/reasoning budget.</p>
+            <p class="formula-explanation"><b>In words:</b> hold preserves the current allocation until the next decision; revise selects an admissible alternative from F. The graph and each role’s model, evidence packet, and generation/reasoning budget are bounded by the experiment.</p>
+            <p class="formula-explanation">F requires supported models/roles, packets that fit the selected model and pool limits, and dispatch reservations/runtime resource controls. It does not guarantee that an action completes the task or meets the population success target.</p>
             <p class="formula-explanation">Phase 1 fixes the graph and budget menu; Phase 2 varies model/context; Phase 3 introduces workers; Phase 4 combines validated choices. The tuple is the broad agenda, not an instruction to learn every choice at once.</p>
           </article>
         </div>
@@ -326,11 +329,12 @@
           <article class="notation-card reveal" aria-labelledby="notation-episode">
             <h3 id="notation-episode">Policy and episode outcomes</h3>
             <dl class="symbol-list">
-              <div><dt>π</dt><dd>The routing policy: rules or a learned controller mapping available history/resources to hold, revise, and allocation choices.</dd></div>
-              <div><dt>E[·]</dt><dd>An average over the evaluation task population and execution randomness. For a checkpoint value, average over future continuations conditional on that checkpoint and protocol.</dd></div>
+              <div><dt>π, π<sub>ref</sub></dt><dd>π is the routing policy mapping visible history/resources to allocation choices. π<sub>ref</sub> is a predeclared reference policy, such as always Strong, under the same task population and scaffold.</dd></div>
+              <div><dt>E[·], E<sub>π</sub>[·]</dt><dd>An average over tasks and execution randomness. E<sub>π</sub> explicitly uses policy π. A checkpoint expectation conditions on its observed history/resources and the stated future protocol.</dd></div>
               <div><dt>Y</dt><dd>Terminal success: 1 if the final task passes the declared checks, otherwise 0. E[Y] is the task-completion probability.</dd></div>
               <div><dt>C, L</dt><dd>Total episode deployment cost C in a declared unit, such as dollars; end-to-end wall time L in seconds. Parallel workers add spend, but their latencies are not simply summed.</dd></div>
-              <div><dt>B<sub>C</sub>, B<sub>L</sub></dt><dd>Limits on average episode cost and latency. They are not individual workers’ token limits or guarantees that every episode stays under a hard cap.</dd></div>
+              <div><dt>p<sub>ref</sub>, ε</dt><dd>p<sub>ref</sub> = E<sub>π<sub>ref</sub></sub>[Y] is the reference completion probability. ε is the allowed absolute loss: 0.02 means two percentage points, not a 2% relative loss.</dd></div>
+              <div><dt>B<sub>L</sub></dt><dd>The allowed population-average episode wall time. It is not a per-worker latency sum, a token budget, or the individual episode deadline.</dd></div>
             </dl>
           </article>
           <article class="notation-card reveal" aria-labelledby="notation-allocation">
@@ -338,7 +342,8 @@
             <dl class="symbol-list">
               <div><dt>t; H<sub>t</sub>, r<sub>t</sub></dt><dd>t is a decision index, not elapsed seconds. H<sub>t</sub> is the visible global/local execution history and current workspace evidence. r<sub>t</sub> is a vector of remaining shared resources: spend, deadline time, and tool/turn allowances.</dd></div>
               <div><dt>x<sub>t</sub>, φ</dt><dd>x<sub>t</sub> = φ(H<sub>t</sub>, r<sub>t</sub>) is the router’s feature vector. φ is the feature extractor, such as diagnostics plus a frozen history embedding.</dd></div>
-              <div><dt>a<sub>t</sub>, g<sub>t</sub></dt><dd>a<sub>t</sub> is a proposed allocation. g<sub>t</sub> is its bounded execution graph: coordinator, workers, and their dependencies.</dd></div>
+              <div><dt>a<sub>t</sub>, g<sub>t</sub></dt><dd>a<sub>t</sub> is an allocation from the phase’s allowed menu, including keeping the current configuration. g<sub>t</sub> is its bounded execution graph: coordinator, workers, and dependencies.</dd></div>
+              <div><dt>F(H, r)</dt><dd>The phase-allowed feasible menu given visible state and remaining resources. It checks configuration compatibility and resource controls; admissibility is not evidence of task success.</dd></div>
               <div><dt>A(g<sub>t</sub>), i</dt><dd>A(g<sub>t</sub>) is the set of active agent/role identifiers in that graph. i identifies one of them; the braces contain one assignment per active role.</dd></div>
               <div><dt>m<sub>i</sub>, κ<sub>i</sub></dt><dd>m<sub>i</sub> selects that role’s model from the allowed pool. κ<sub>i</sub> selects the evidence-packet policy, such as full history or a compact handoff—not the model’s native context-window capacity.</dd></div>
               <div><dt>b<sub>i</sub></dt><dd>The allowed generation/reasoning budget for that role, using supported backend controls. It is distinct from context capacity and the shared remaining spend r<sub>t</sub>.</dd></div>
@@ -347,11 +352,12 @@
           <article class="notation-card reveal" aria-labelledby="notation-value">
             <h3 id="notation-value">Continuation value and timing</h3>
             <dl class="symbol-list">
-              <div><dt>Q<sub>a</sub>, μ<sub>a</sub></dt><dd>Q<sub>a</sub> is expected remaining utility after choosing continuation a. μ<sub>a</sub> fixes behavior afterward—for example, Strong with full history until termination, with no further routing.</dd></div>
+              <div><dt>Q<sub>a</sub>, μ<sub>a</sub></dt><dd>In Phase 1a, Q<sub>a</sub> is expected remaining weighted utility for branch a; μ<sub>a</sub> fixes its continuation, such as Strong-full to termination without further routing.</dd></div>
+              <div><dt>Q<sup>π</sup></dt><dd>In later phases, value after allocation a with future allocation decisions following frozen policy π and a fixed worker/merge protocol. Changing either changes the value.</dd></div>
               <div><dt>Y<sub>a</sub>, C<sup>rem</sup><sub>a</sub>, L<sup>rem</sup><sub>a</sub></dt><dd>The resulting terminal success, additional cost, and additional wall time for branch a. Cost/time include its handoff and other downstream overhead, but exclude the already-spent prefix.</dd></div>
-              <div><dt>λ, η</dt><dd>Non-negative cost and latency trade-off weights. With dollar/second accounting, λ penalizes utility per dollar and η per second. These are tuning weights, not model parameters or budgets.</dd></div>
-              <div><dt>Δ<sub>a</sub></dt><dd>The utility difference between branch a and Cheap-to-end at the same checkpoint. Positive means better under the chosen weights, not necessarily higher raw success.</dd></div>
-              <div><dt>V, V<sub>hold</sub></dt><dd>V is the best remaining value before the one allowed intervention. V<sub>hold</sub> continues Cheap to the next decision while retaining the option to intervene later.</dd></div>
+              <div><dt>λ, η</dt><dd>Non-negative weights for the local utility surrogate: penalty per dollar and per second. Tune on development data. They are neither budgets nor the non-inferiority margin ε, and do not enforce the episode constraints.</dd></div>
+              <div><dt>Δ<sub>a</sub>, Δ<sup>π</sup><sub>a</sub></dt><dd>Phase 1a compares a with Cheap-to-end. The later-phase Δ<sup>π</sup><sub>a</sub> compares revising with holding under the same future policy. Positive means better weighted utility, not necessarily lower cost.</dd></div>
+              <div><dt>V, V<sub>hold</sub></dt><dd>Phase 1b’s best remaining weighted utility before its one intervention, and the value of continuing Cheap to the next decision with the option to intervene later. Neither is a cost-constraint certificate.</dd></div>
               <div><dt>H′, r′</dt><dd>The next visible history and remaining-resource vector after executing the Cheap segment. They depend on its observations, spend, and elapsed time.</dd></div>
               <div><dt>c<sub>segment</sub>, ℓ<sub>segment</sub></dt><dd>Additional cost and wall time between this decision and the next. Lowercase c/ℓ are one segment; uppercase C/L are episode totals.</dd></div>
             </dl>
@@ -361,12 +367,12 @@
 
         <div class="formal-steps">
           <article class="reveal">
-            <h3>Phase 1a: value of a fixed continuation</h3>
+            <h3>Phase 1a: estimate a fixed continuation’s value</h3>
             <div class="math-line">Q<sub>a</sub>(H<sub>t</sub>, r<sub>t</sub>; μ<sub>a</sub>) = E[Y<sub>a</sub> − λC<sup>rem</sup><sub>a</sub> − ηL<sup>rem</sup><sub>a</sub> | H<sub>t</sub>, r<sub>t</sub>; μ<sub>a</sub>]</div>
             <div class="math-line">Δ<sub>a</sub> = Q<sub>a</sub> − Q<sub>cheap-to-end</sub></div>
             <p><b>Read the conditional:</b> “given the same observed checkpoint and remaining resources, and following the stated continuation protocol.” Compare continue-Cheap, Strong with full/compact context, and Strong restart. Fully sampled branches support supervised predictors; deployment with feedback only for the selected action is a contextual-bandit setting.</p>
             <div class="math-line">Q̂<sub>a</sub> = p̂<sub>a</sub> − λĈ<sup>rem</sup><sub>a</sub> − ηL̂<sup>rem</sup><sub>a</sub></div>
-            <p><b>What we train:</b> p̂<sub>a</sub> estimates P(Y<sub>a</sub> = 1 | H<sub>t</sub>, r<sub>t</sub>; μ<sub>a</sub>); Ĉ and L̂ estimate remaining cost and time. These estimates come from executed training branches, not an oracle. Tune λ/η on development data and verify actual success/cost/latency constraints on fresh episodes; penalized utility does not automatically satisfy the original budgets.</p>
+            <p><b>What we train:</b> p̂<sub>a</sub> estimates P(Y<sub>a</sub> = 1 | H<sub>t</sub>, r<sub>t</sub>; μ<sub>a</sub>); Ĉ and L̂ estimate remaining cost and time. These estimates come from executed training branches, not an oracle. Use Q̂ as a local ranking surrogate, not the primary cost objective. Tune λ/η on development data; penalized utility does not automatically satisfy the episode constraints. Accept operating points only after the declared completion-margin and latency checks on fresh, whole-policy episodes. The population success threshold is not a per-checkpoint cutoff on p̂<sub>a</sub>.</p>
             <div class="value-example" aria-label="Illustrative fixed-checkpoint utility calculation">
               <span class="formula-label">Worked example · fictional predictions</span>
               <p>At one checkpoint, suppose both fixed continuations are feasible. Let λ = 0.20 per dollar and η = 0.001 per second; the remaining cost/time estimates include handoff overhead.</p>
@@ -374,20 +380,24 @@
                 <div><h4>Continue Cheap</h4><p>Predicted success 0.55 · $0.10 more · 40 s more</p><code>Q̂ = 0.55 − 0.20 × 0.10 − 0.001 × 40 = 0.49</code></div>
                 <div><h4>Strong + full history</h4><p>Predicted success 0.85 · $0.50 more · 60 s more</p><code>Q̂ = 0.85 − 0.20 × 0.50 − 0.001 × 60 = 0.69</code></div>
               </div>
-              <p><b>Δ̂<sub>Strong</sub> = 0.69 − 0.49 = +0.20:</b> Strong ranks higher for this fixed choice. That does not yet show switching now is better than waiting. If the prefix already used $0.20 and 30 s, Strong’s predicted whole-episode totals are $0.70 and 90 s; sunk prefix resources cancel in this local comparison but remain in the reported totals.</p>
+              <p><b>Δ̂<sub>Strong</sub> = 0.69 − 0.49 = +0.20:</b> Strong ranks higher under these weights. This is not a cost saving or proof of population-level non-inferiority, and does not yet show switching now is better than waiting. If the prefix already used $0.20 and 30 s, Strong’s predicted whole-episode totals are $0.70 and 90 s; sunk prefix resources cancel in this local comparison but remain in the reported totals.</p>
             </div>
           </article>
           <article class="reveal">
             <h3>Phase 1b: value of waiting before one intervention</h3>
             <div class="math-line">V(H, r) = max{ V<sub>hold</sub>(H, r), max<sub>a ∈ feasible interventions</sub> Q<sub>a</sub>(H, r) }</div>
             <div class="math-line">V<sub>hold</sub>(H, r) = E[−λc<sub>segment</sub> − ηℓ<sub>segment</sub> + V(H′, r′) | H, r, hold]</div>
-            <p><b>In words:</b> compare intervening now with paying for another Cheap segment and deciding again on the new evidence. Terminal V equals Y, and recursion stops when the episode terminates. “Cheap to the end” commits to never intervening; V<sub>hold</sub> preserves the future option. They are not the same quantity.</p>
+            <p><b>In words:</b> compare intervening now with paying for another Cheap segment and deciding again on the new evidence. Terminal V equals Y, and recursion stops when the episode terminates. This recursion concerns weighted utility, not a direct solution of the constrained cost objective. “Cheap to the end” commits to never intervening; V<sub>hold</sub> preserves the future option. They are not the same quantity.</p>
             <p>Estimate that future option from additional transitions/branches or fitted policy evaluation. The equations define values; they do not make them directly observable. Restrict actions using the documented spend/deadline controls—predicted means alone cannot guarantee hard caps. Freeze the resulting policy before fresh closed-loop evaluation.</p>
           </article>
           <article class="reveal">
-            <h3>General framework: constrained sequential control</h3>
-            <p>Repeated revisions and variable intervals between decisions motivate a history/belief-based constrained semi-Markov decision process: actions may last different amounts of time, and the visible state is incomplete. State the continuation policy whenever estimating action value; changing future routing or worker behavior changes that value. Duration, cache state, coordination, and merge effects belong in transitions and resource accounting.</p>
-            <p>This framework supports the broad agenda; it is not a claim to solve the full action space in one training run. <a href="https://ojs.aaai.org/index.php/AAAI/article/view/11831" target="_blank" rel="noreferrer">Deliberation-cost options</a> and <a href="https://proceedings.mlr.press/v306/lefebvre26a.html" target="_blank" rel="noreferrer">Cost of Commitment</a> provide relevant foundations.</p>
+            <h3>Phases 2–4: extend the same value to context and workers</h3>
+            <div class="math-line">Q<sup>π</sup>(H, r, a) = E[Y<sub>a</sub> − λC<sup>rem</sup><sub>a</sub> − ηL<sup>rem</sup><sub>a</sub> | H, r, a; π]</div>
+            <div class="math-line">Δ<sup>π</sup><sub>a</sub> = Q<sup>π</sup>(H, r, a) − Q<sup>π</sup>(H, r, hold)</div>
+            <p><b>In words:</b> execute the candidate allocation a from the same restored checkpoint, then follow the named future controller π. Here a can change model/context pairs or bounded-worker assignments as its phase permits. Holding retains the current allocation until the next decision, followed by the same π—not a commitment to Cheap-to-end.</p>
+            <p>μ<sub>a</sub> fixes a complete Phase 1a branch; π may make later decisions in these phases. Freeze that continuation policy and worker/merge protocol when collecting or comparing labels. Offline values from one policy do not automatically transfer to another.</p>
+            <p>Repeated revisions and variable decision intervals fit a history/belief-based constrained semi-Markov framework. Spend is summed across agents; remaining latency is the resulting elapsed wall time, not the sum of worker runtimes. Cache, transfer, coordination, and merge costs belong in the measured continuation.</p>
+            <p>The integrated policy must improve episode cost under the same completion/latency conditions as the composed baseline; a higher surrogate Q alone is insufficient. This framework supports the broad agenda, not solving the full action space in one training run. <a href="https://ojs.aaai.org/index.php/AAAI/article/view/11831" target="_blank" rel="noreferrer">Deliberation-cost options</a> and <a href="https://proceedings.mlr.press/v306/lefebvre26a.html" target="_blank" rel="noreferrer">Cost of Commitment</a> provide relevant foundations.</p>
           </article>
         </div>
       </section>
