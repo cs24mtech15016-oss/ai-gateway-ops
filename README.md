@@ -1,12 +1,22 @@
 # ai-gateway-ops
 
-> **Research site:** [CheckpointRouter — checkpoint-aware model, context, and sub-agent routing](https://cs24mtech15016-oss.github.io/ai-gateway-ops/)
+> **Research site:** [CheckpointRouter — checkpoint-specific agent recovery](https://cs24mtech15016-oss.github.io/ai-gateway-ops/)
 > ([source](docs/index.html))
 
-This repository also hosts a grounded research proposal for deciding **when** a long-horizon
-system should revise its execution graph and which **model, context tier, and reasoning budget**
-should power the coordinator or each spawned sub-agent. The static, dependency-free site lives
-in [`docs/`](docs/) and is published with GitHub Pages.
+This repository hosts a research proposal asking: **Can we predict whether a stronger model
+will actually improve a partially completed software-agent task, and choose between continuing,
+full/compact-context handoff, and restarting under the remaining cost and latency budget?**
+
+The first study is deliberately bounded: one agent, two models, restorable checkpoints, and
+repeated executed continuations. Adaptive timing, model/context pools, and bounded sub-agents
+are follow-up experiments. The site compares this question with Avengers-Pro, vLLM Semantic
+Router, TACIT-Switch, MTRouter, SWE-Router, TwinRouterBench, ProgRouter, MasRouter, and other
+prior art; novelty is provisional, not a claim to invent long-horizon routing.
+
+The static, dependency-free site lives in [`docs/`](docs/) and is published with GitHub Pages.
+**Status:** the checkpoint controller and recovery dataset are proposed, not implemented.
+The working gateway and offline Avengers-Pro benchmark below are separate infrastructure;
+running them does not train or evaluate the proposed checkpoint controller.
 
 A self-hosted LLM gateway: [**LiteLLM**](https://docs.litellm.ai) as the OpenAI-compatible
 front door, routing to open-weight models served locally by [**Ollama**](https://ollama.com)
@@ -46,8 +56,8 @@ Ollama directly.
 ## Quick start
 
 ```bash
-make init                 # creates .env from the template
-# edit .env: set LITELLM_MASTER_KEY (sk-...) and LITELLM_SALT_KEY
+make init                 # creates .env with random keys only if absent
+# review .env; an existing file is preserved
 make models               # pulls qwen2.5:7b + llama3.1:8b via Ollama
 make up                   # starts LiteLLM + Postgres + Redis
 make health               # confirm the gateway is up and list models
@@ -165,10 +175,12 @@ router — reporting its accuracy on the held-out split.
 Tunables (env vars): `EMBED_MODEL` / `EMBED_URL` (default `nomic-embed-text` @ Ollama),
 `SEED`, `SPLIT`, `SKIP_ANALYSIS=1` (skip the slow Oracle/baseline tables), `BENCH_HOME`.
 
-> Reality check: with local `nomic-embed-text` embeddings the router lands ~70% (above the best
-> single model ~67% and Random ~49%), confirming the pipeline. Absolute numbers won't match the
-> paper's leaderboard, which uses `gte_Qwen2-7B-instruct` — point `EMBED_MODEL`/`EMBED_URL` at a
-> hosted gte/Qwen endpoint to reproduce it exactly.
+> Earlier local smoke-run observations were approximately 70% routed accuracy, 67% best-single,
+> and 49% random with `nomic-embed-text`. No versioned result artifact is committed here, so
+> treat these as anecdotal pipeline checks, not a reproducible research result. Matching a
+> leaderboard requires its data/split, model pool, upstream revision, router settings, seeds,
+> and embedding model—not just changing `EMBED_MODEL`/`EMBED_URL`. These are request-level
+> scores, not long-horizon recovery or episode-success results.
 
 ## Adding a model
 
@@ -183,7 +195,8 @@ Tunables (env vars): `EMBED_MODEL` / `EMBED_URL` (default `nomic-embed-text` @ O
 | `docker-compose.yml` | LiteLLM + Postgres + Redis (Ollama runs on the host) |
 | `litellm/config.yaml` | Model routing, load balancing, Auto Router, gateway settings |
 | `.env.example` | Config template (keys) |
-| `Makefile` | One-click `make setup`, plus `up / health / test / bench` |
+| `Makefile` | Safe `make init`, full `make setup`, plus `up / health / test / bench` |
+| `docs/` | Research proposal site; not a checkpoint-controller implementation |
 | `jobs/` | Terminal-Bench run results (git-ignored) |
 
 ## Requirements (full)

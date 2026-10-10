@@ -3,7 +3,7 @@
 # One-click:  make setup   (installs everything + starts the gateway)
 #             make bench    (runs the benchmark against the local gateway)
 
-.PHONY: help setup up down logs ps health test test-router \
+.PHONY: help init setup up down logs ps health test test-router \
         models install-ollama install-harbor \
         bench bench-smoke bench-view bench-clean \
         router-bench router-bench-clean clean
@@ -33,6 +33,8 @@ setup: install-ollama models install-harbor .env up ## One-click: install deps, 
 	@echo
 	@echo "✅ Gateway up on http://localhost:4000  (UI: /ui)"
 	@echo "   Try:  make test   |   make test-router   |   make bench"
+
+init: .env ## Create local config with generated keys; preserve an existing .env
 
 .env: ## Create .env with generated keys if missing
 	@test -f .env || { \

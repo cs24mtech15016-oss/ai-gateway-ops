@@ -1,14 +1,42 @@
 const header = document.querySelector("[data-header]");
 const reveals = document.querySelectorAll(".reveal");
-const navLinks = [...document.querySelectorAll(".desktop-nav a")];
+const mobileNav = document.querySelector("[data-mobile-nav]");
+const navLinks = [...document.querySelectorAll(".desktop-nav a, .mobile-nav nav a")];
 const sections = [...document.querySelectorAll("main section[id]")];
 
 const setHeaderState = () => {
   header?.classList.toggle("is-scrolled", window.scrollY > 24);
+  const marker = (header?.offsetHeight ?? 72) + 32;
+  const current = [...sections].reverse().find((section) => section.getBoundingClientRect().top <= marker);
+  navLinks.forEach((link) => {
+    const active = link.getAttribute("href") === `#${current?.id}`;
+    link.classList.toggle("is-active", active);
+    if (active) link.setAttribute("aria-current", "location");
+    else link.removeAttribute("aria-current");
+  });
 };
 
 setHeaderState();
-window.addEventListener("scroll", setHeaderState, { passive: true });
+let scrollPending = false;
+window.addEventListener("scroll", () => {
+  if (scrollPending) return;
+  scrollPending = true;
+  window.requestAnimationFrame(() => {
+    setHeaderState();
+    scrollPending = false;
+  });
+}, { passive: true });
+window.addEventListener("resize", setHeaderState);
+
+mobileNav?.addEventListener("click", (event) => {
+  if (!event.target.closest("nav a")) return;
+  mobileNav.open = false;
+});
+document.addEventListener("keydown", (event) => {
+  if (event.key !== "Escape" || !mobileNav?.open) return;
+  mobileNav.open = false;
+  mobileNav.querySelector("summary")?.focus();
+});
 
 if ("IntersectionObserver" in window) {
   const revealObserver = new IntersectionObserver(
@@ -21,21 +49,10 @@ if ("IntersectionObserver" in window) {
     },
     { threshold: 0.08 }
   );
+  // Enable progressive animation only after the observer is ready. Content stays
+  // visible if this script fails to load; reduced-motion and print override it.
+  document.documentElement.classList.add("js");
   reveals.forEach((element) => revealObserver.observe(element));
-
-  const sectionObserver = new IntersectionObserver(
-    (entries) => {
-      const visible = entries
-        .filter((entry) => entry.isIntersecting)
-        .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
-      if (!visible) return;
-      navLinks.forEach((link) => {
-        link.classList.toggle("is-active", link.getAttribute("href") === `#${visible.target.id}`);
-      });
-    },
-    { rootMargin: "-25% 0px -60% 0px", threshold: [0.05, 0.2, 0.5] }
-  );
-  sections.forEach((section) => sectionObserver.observe(section));
 } else {
   reveals.forEach((element) => element.classList.add("is-visible"));
 }
