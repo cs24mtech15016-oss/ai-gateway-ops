@@ -1,20 +1,31 @@
 # ai-gateway-ops
 
-> **Research site:** [CheckpointRouter — checkpoint-specific agent recovery](https://cs24mtech15016-oss.github.io/ai-gateway-ops/)
+> **Research site:** [CheckpointRouter — checkpoint-aware model, context, and sub-agent routing](https://cs24mtech15016-oss.github.io/ai-gateway-ops/)
 > ([source](docs/index.html))
 
-This repository hosts a research proposal asking: **Can we predict whether a stronger model
-will actually improve a partially completed software-agent task, and choose between continuing,
-full/compact-context handoff, and restarting under the remaining cost and latency budget?**
+This repository hosts a research proposal asking: **How can a long-horizon system determine
+when to revise its execution graph and which model–context configuration should power each
+continuing or newly spawned agent, given execution evidence, dependencies, and budget?**
 
-The first study is deliberately bounded: one agent, two models, restorable checkpoints, and
-repeated executed continuations. Adaptive timing, model/context pools, and bounded sub-agents
-are follow-up experiments. The site compares this question with Avengers-Pro, vLLM Semantic
-Router, TACIT-Switch, MTRouter, SWE-Router, TwinRouterBench, ProgRouter, MasRouter, and other
-prior art; novelty is provisional, not a claim to invent long-horizon routing.
+The broad agenda is checkpoint-aware model, context, reasoning-budget, and sub-agent allocation
+judged by terminal episode success, total cost, and latency. Experiments are scoped in phases:
+
+1. **Checkpoint model control:** one agent and two models; measure continuation value, including
+   recovery, then compare fixed-prefix, per-call, and adaptive timing.
+2. **Model–context allocation:** a bounded model pool and explicit full/compact evidence packets;
+   separate model capability, context capacity, and actual token/cache usage.
+3. **Bounded sub-agent assignment:** fixed worker roles, at most two workers, and model/context
+   assignments under a shared budget, with coordination and merging costs included.
+4. **Integrated controller:** combine validated choices and test their interactions against
+   simple composed policies; add a small reasoning-budget menu only if justified.
+
+Recovery is a tractable first measurement, not the identity of the whole proposal. The site
+retains grounding in Avengers-Pro, vLLM Semantic Router, TACIT-Switch, MTRouter, SWE-Router,
+TwinRouterBench, ProgRouter, MasRouter, and other prior art. Novelty remains provisional;
+existing adaptive handoff, terminal-outcome learning, and joint orchestration are acknowledged.
 
 The static, dependency-free site lives in [`docs/`](docs/) and is published with GitHub Pages.
-**Status:** the checkpoint controller and recovery dataset are proposed, not implemented.
+**Status:** the checkpoint controller and phased checkpoint dataset are proposed, not implemented.
 The working gateway and offline Avengers-Pro benchmark below are separate infrastructure;
 running them does not train or evaluate the proposed checkpoint controller.
 
