@@ -230,8 +230,9 @@
             <p class="kicker">Prior art</p>
             <h2>The field is active. The opportunity is specific.</h2>
             <p class="section-intro">
-              This project does not claim to invent multi-turn routing. It builds on query routers,
-              cascades, partial-trajectory escalation, and per-turn agent routers.
+              This project does not claim to invent model routing or multi-turn routing. It builds
+              on learned single-pass routers, programmable production routers, cascades,
+              partial-trajectory escalation, and per-turn agent routers.
             </p>
           </div>
         </div>
@@ -240,11 +241,13 @@
           <article>
             <div class="prior-stage">Query</div>
             <div class="prior-body">
-              <h3>Single-turn adaptive routing</h3>
+              <h3>Learned single-pass query routing</h3>
               <p>
+                <a href="https://arxiv.org/abs/2508.12631" target="_blank" rel="noreferrer">Avengers-Pro</a>
+                embeds and clusters each incoming query, then selects a model using cluster-level
+                performance–efficiency scores;
                 <a href="https://arxiv.org/abs/2508.21141" target="_blank" rel="noreferrer">PILOT</a>
-                frames model selection as a budget-aware contextual bandit that learns from feedback
-                on the selected model.
+                instead learns from contextual-bandit feedback.
               </p>
             </div>
             <span class="prior-gap">No evolving environment state</span>
@@ -262,6 +265,18 @@
               </p>
             </div>
             <span class="prior-gap">Strong representation; still opening-request evidence</span>
+          </article>
+          <article>
+            <div class="prior-stage">Policy</div>
+            <div class="prior-body">
+              <h3>Programmable production routing</h3>
+              <p>
+                <a href="https://arxiv.org/abs/2603.04444" target="_blank" rel="noreferrer">vLLM Semantic Router</a>
+                composes semantic, safety, modality, identity, conversation, and runtime signals into
+                policy decisions that select one backend or a bounded multi-model path.
+              </p>
+            </div>
+            <span class="prior-gap">Harness owns the task loop and durable state</span>
           </article>
           <article>
             <div class="prior-stage">Prefix</div>
@@ -342,6 +357,41 @@
           </article>
         </div>
 
+        <div class="prior-focus reveal" aria-label="Detailed placement of two practical router baselines">
+          <article>
+            <span class="phase-tag">Learned baseline</span>
+            <h3>Avengers-Pro</h3>
+            <code>query → embedding → cluster → model score → route</code>
+            <p>
+              Its strength is a simple, tunable performance–cost Pareto policy over a heterogeneous
+              model pool. Its decision remains query-level: it does not decide checkpoint timing,
+              model commitment duration, sub-agent lifecycle, or remaining-episode value.
+            </p>
+            <strong>Use in this study</strong>
+            <ul>
+              <li>Route once from the original request.</li>
+              <li>Re-run independently at every model call.</li>
+              <li>Route only at checkpoints from a structured trajectory-state embedding.</li>
+            </ul>
+          </article>
+          <article>
+            <span class="phase-tag">Production framework</span>
+            <h3>vLLM Semantic Router</h3>
+            <code>signals → projections → policy → candidates → backend</code>
+            <p>
+              This is not one fixed semantic classifier. It is a configurable routing and control
+              layer with session-aware signals, plugins, memory, and bounded multi-model algorithms.
+              Its official boundary leaves the agent loop, tool execution, and durable task state to the harness.
+            </p>
+            <strong>Use in this study</strong>
+            <ul>
+              <li>Serve as a configured signal-and-policy baseline.</li>
+              <li>Act as the production execution layer beneath the episode controller.</li>
+              <li>Keep logical model selection distinct from replica scheduling.</li>
+            </ul>
+          </article>
+        </div>
+
         <aside class="honesty-note reveal">
           <strong>Defensible positioning</strong>
           <p>
@@ -349,6 +399,8 @@
             Both already exist. The narrower claim is joint, event-triggered control of
             <b>when the execution graph changes</b> and <b>which model–context pair powers each
             agent</b>, trained and judged by terminal episode outcomes with explicit handoff cost.
+            vLLM Semantic Router could implement the call-level policy beneath this controller; it
+            is not evidence that episode-level control is already solved.
           </p>
         </aside>
       </section>
@@ -390,7 +442,7 @@
           </div>
           <div class="gap-row" role="row">
             <strong role="cell">What state</strong>
-            <p role="cell">Opening prompt, local step features, or a preliminary team trial</p>
+            <p role="cell">Opening prompt, request/session signals, local step features, or a preliminary team trial</p>
             <p role="cell">How should global state, local agent history, dependencies, and context occupancy combine?</p>
           </div>
           <div class="gap-row" role="row">
@@ -428,8 +480,9 @@
           <p class="kicker">Why local routers break over a horizon</p>
           <h3>Long-horizon routing is a causal control problem, not repeated classification.</h3>
           <p>
-            Calling a one-shot router at every turn does not make it sequentially optimal. Each
-            choice changes what the agent observes, edits, remembers, and can recover from next.
+            Calling Avengers-Pro, a semantic policy, or another request-level router at every turn
+            does not make it sequentially optimal. Each choice changes what the agent observes,
+            edits, remembers, and can recover from next.
           </p>
         </div>
         <div class="horizon-grid reveal">
@@ -501,19 +554,22 @@
             <span>09 · Evaluation mismatch</span>
             <h4>Static tables cannot replay consequences.</h4>
             <p>
-              LLMRouterBench reveals complementarity on one-shot data, but TwinRouterBench shows why
-              live execution is needed to test whether a downgrade preserves downstream success.
+              Avengers-Pro and LLMRouterBench reveal complementarity on one-shot data, but
+              TwinRouterBench shows why live execution is needed to test whether a downgrade
+              preserves downstream success.
             </p>
           </article>
         </div>
         <aside class="closest-work reveal">
           <strong>What the strongest prior art already solves</strong>
           <p>
-            MTRouter conditions on history at each turn; SWE-Router waits for an informative prefix;
-            AgentRouter selects a tier per workflow step; TwinRouterBench evaluates full live runs;
-            and Router-R1 learns multi-round model invocation and aggregation. The remaining opening
-            is narrower: <b>learn when to reconsider</b>, support persistent tool state and sub-agent
-            graph changes, assign model and context jointly, and estimate value over the remaining episode.
+            Avengers-Pro is a strong learned single-pass baseline; vLLM Semantic Router supplies a
+            rich production policy and execution layer; MTRouter conditions on history at each turn;
+            SWE-Router waits for an informative prefix; AgentRouter selects a tier per workflow step;
+            TwinRouterBench evaluates full live runs; and Router-R1 learns multi-round invocation.
+            The remaining opening is narrower: <b>learn when to reconsider</b>, support persistent
+            tool state and sub-agent graph changes, assign model and context jointly, and estimate
+            value over the remaining episode.
           </p>
         </aside>
       </section>
@@ -618,7 +674,7 @@
             <ul>
               <li>Actions: continue cheap or escalate permanently</li>
               <li>Learning: calibrated classification + cost regression</li>
-              <li>No reinforcement learning required</li>
+              <li>Benchmark against original, per-call, and checkpoint Avengers-Pro</li>
             </ul>
           </article>
           <article>
@@ -662,6 +718,8 @@
           <a href="https://huggingface.co/SWE-Router" target="_blank" rel="noreferrer"><strong>SWE-Router</strong><span>Multi-model SWE trajectories and trained value models</span><i>↗</i></a>
           <a href="https://github.com/CommonstackAI/TwinRouterBench" target="_blank" rel="noreferrer"><strong>TwinRouterBench</strong><span>Step labels, live SWE evaluation, and data pipeline</span><i>↗</i></a>
           <a href="https://github.com/ynulihao/LLMRouterBench" target="_blank" rel="noreferrer"><strong>LLMRouterBench</strong><span>400K+ query-model records and cost fields</span><i>↗</i></a>
+          <a href="https://github.com/ZhangYiqun018/AvengersPro" target="_blank" rel="noreferrer"><strong>Avengers-Pro</strong><span>Single-pass clustering router code and evaluation setup</span><i>↗</i></a>
+          <a href="https://github.com/vllm-project/semantic-router" target="_blank" rel="noreferrer"><strong>vLLM Semantic Router</strong><span>Production signal, policy, plugin, and model-path framework</span><i>↗</i></a>
           <a href="https://huggingface.co/datasets/JetBrains-Research/agent-trajectories-swesmith-random-subset" target="_blank" rel="noreferrer"><strong>JetBrains routed trajectories</strong><span>1,465 SWE-Smith episodes with per-step selected models</span><i>↗</i></a>
           <a href="https://huggingface.co/datasets/SWE-bench/SWE-smith-trajectories" target="_blank" rel="noreferrer"><strong>SWE-Smith trajectories</strong><span>Large official collection of software-agent traces</span><i>↗</i></a>
           <a href="https://huggingface.co/SWE-Gym/datasets" target="_blank" rel="noreferrer"><strong>SWE-Gym</strong><span>Training tasks, trajectories, and verifier data</span><i>↗</i></a>
@@ -690,13 +748,15 @@
             <h3>Required baselines</h3>
             <ol class="clean-list">
               <li><span>01</span>Always-cheap and always-strong</li>
-              <li><span>02</span>Prompt-only router</li>
-              <li><span>03</span>Fixed early escalation</li>
-              <li><span>04</span>Rule-based event escalation</li>
-              <li><span>05</span>Static role–model–context table</li>
-              <li><span>06</span>AgentRouter-style independent step router</li>
-              <li><span>07</span>Static or task-level optimized agent graph</li>
-              <li><span>08</span>Checkpoint oracle from available joint branches</li>
+              <li><span>02</span>Avengers-Pro on the original request</li>
+              <li><span>03</span>Configured vLLM Semantic Router policy</li>
+              <li><span>04</span>Avengers-Pro repeated at every call</li>
+              <li><span>05</span>Checkpoint Avengers-Pro with trajectory state</li>
+              <li><span>06</span>Fixed and rule-based event escalation</li>
+              <li><span>07</span>Static role–model–context table</li>
+              <li><span>08</span>AgentRouter-style independent step router</li>
+              <li><span>09</span>Static or task-level optimized agent graph</li>
+              <li><span>10</span>Checkpoint oracle from available joint branches</li>
             </ol>
           </div>
           <div>
@@ -761,9 +821,10 @@
           <strong>Most honest expectation</strong>
           <p>
             A bounded coordinator–worker study is practical; a fully general graph controller is not.
-            The strongest competitor may be a static table: strong model for planning/review, cheap
-            short-context model for scoped workers, and escalation after failed tests. The learned
-            router must beat that policy materially after coordination overhead—not just statistically.
+            The strongest competitor may be checkpoint Avengers-Pro or a static table: strong model
+            for planning/review, cheap short-context model for scoped workers, and escalation after
+            failed tests. The learned router must beat these materially after coordination overhead—not
+            just statistically. vLLM Semantic Router is a credible way to deploy either policy.
           </p>
         </aside>
       </section>
@@ -798,6 +859,7 @@
           <a href="https://arxiv.org/abs/2406.18665" target="_blank" rel="noreferrer"><span>2024</span><strong>RouteLLM</strong><small>Single-pass strong/weak model routing</small><i>↗</i></a>
           <a href="https://arxiv.org/abs/2305.05176" target="_blank" rel="noreferrer"><span>2023</span><strong>FrugalGPT</strong><small>Learned LLM cascades</small><i>↗</i></a>
           <a href="https://arxiv.org/abs/2601.07206" target="_blank" rel="noreferrer"><span>2026</span><strong>LLMRouterBench</strong><small>400K+ one-shot routing records and unified baselines</small><i>↗</i></a>
+          <a href="https://arxiv.org/abs/2508.12631" target="_blank" rel="noreferrer"><span>2025</span><strong>Avengers-Pro</strong><small>Embedding-cluster performance–efficiency routing</small><i>↗</i></a>
           <a href="https://arxiv.org/abs/2508.21141" target="_blank" rel="noreferrer"><span>2025</span><strong>Adaptive LLM Routing under Budget Constraints</strong><small>PILOT · contextual bandits</small><i>↗</i></a>
           <a href="https://arxiv.org/abs/2310.12963" target="_blank" rel="noreferrer"><span>2023</span><strong>AutoMix: Automatically Mixing Language Models</strong><small>POMDP · self-verification</small><i>↗</i></a>
           <a href="https://proceedings.neurips.cc/paper_files/paper/2024/hash/a6deba3b2408af45b3f9994c2152b862-Abstract-Conference.html" target="_blank" rel="noreferrer"><span>2024</span><strong>Efficient Contextual LLM Cascades</strong><small>TREACLE · constrained policy learning</small><i>↗</i></a>
@@ -809,6 +871,8 @@
           <a href="https://arxiv.org/abs/2608.15817" target="_blank" rel="noreferrer"><span>2026</span><strong>RLCascadeRouter</strong><small>Quality-estimator-free cascade RL</small><i>↗</i></a>
           <a href="https://arxiv.org/abs/2609.22951" target="_blank" rel="noreferrer"><span>2026</span><strong>AgentRouter</strong><small>Step-level heterogeneous routing</small><i>↗</i></a>
           <a href="https://arxiv.org/abs/2603.20895" target="_blank" rel="noreferrer"><span>2026</span><strong>LLM Router: Rethinking Routing with Prefill Activations</strong><small>Activation-based model correctness prediction</small><i>↗</i></a>
+          <a href="https://arxiv.org/abs/2603.04444" target="_blank" rel="noreferrer"><span>2026</span><strong>vLLM Semantic Router</strong><small>Signal-driven programmable request routing</small><i>↗</i></a>
+          <a href="https://github.com/vllm-project/semantic-router/blob/main/website/docs/overview/semantic-router-overview.md" target="_blank" rel="noreferrer"><span>Docs</span><strong>vLLM Semantic Router system boundary</strong><small>Harness-owned task loop and durable state</small><i>↗</i></a>
           <a href="https://sqwish.ai/blog/how-we-accidentally-trained-the-1-model-router" target="_blank" rel="noreferrer"><span>Report</span><strong>How We Accidentally Trained the World's #1 Model Router</strong><small>Model fingerprints, budgets, uncertainty, and agent opportunity</small><i>↗</i></a>
           <a href="https://arxiv.org/abs/2310.02170" target="_blank" rel="noreferrer"><span>2024</span><strong>DyLAN</strong><small>Dynamic team selection and agent collaboration</small><i>↗</i></a>
           <a href="https://arxiv.org/abs/2502.04510" target="_blank" rel="noreferrer"><span>2025</span><strong>Heterogeneous Swarms</strong><small>Joint multi-model role and graph optimization</small><i>↗</i></a>
@@ -817,7 +881,7 @@
           <a href="https://github.com/ynulihao/LLMRouterBench" target="_blank" rel="noreferrer"><span>Code</span><strong>LLMRouterBench</strong><small>Benchmark and unified data framework</small><i>↗</i></a>
           <a href="https://github.com/CommonstackAI/TwinRouterBench" target="_blank" rel="noreferrer"><span>Code</span><strong>TwinRouterBench repository</strong><small>Data pipeline and live SWE harness</small><i>↗</i></a>
         </div>
-        <p class="reviewed reveal">Research links reviewed 8 October 2026.</p>
+        <p class="reviewed reveal">Research links reviewed 10 October 2026.</p>
       </section>
     </main>
 
