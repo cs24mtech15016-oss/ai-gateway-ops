@@ -261,41 +261,44 @@
 
       <section class="section section-paper" id="gap">
         <div class="section-heading reveal"><span class="section-number">04</span><div>
-          <p class="kicker">Research gap</p><h2>The episode couples timing, context, and agent assignments.</h2>
-          <p class="section-intro">The question is not whether any of these choices exists. It is when evidence-driven, coordinated resource allocation is worth learning instead of composing existing routers, fixed context policies, and role/model tables.</p>
+          <p class="kicker">Research gap</p><h2>When is changing the allocation worth it?</h2>
+          <p class="section-intro"><a href="#prior-art">Prior art already supplies the pieces</a>: model selection, adaptive handoff, context transfer, and multi-agent assignment. The question here is when execution evidence justifies revising those choices, and whether the revision helps the whole task.</p>
         </div></div>
-        <div class="table-wrap reveal" tabindex="0" role="region" aria-label="Checkpoint resource allocation: established capabilities versus research questions">
-          <table class="research-table">
-            <caption>Provisional gap: isolate each decision, then test whether its interaction with the others matters</caption>
-            <thead><tr><th scope="col">Decision axis</th><th scope="col">Already established</th><th scope="col">Question to test here</th></tr></thead>
-            <tbody>
-              <tr><th scope="row">When to route</th><td>Fixed-prefix decisions, per-turn policies, and adaptively timed permanent handoff.</td><td>With a matched state/value model, when do event-gated decisions preserve episode success while reducing decision and transfer overhead?</td></tr>
-              <tr><th scope="row">Which compute</th><td>Query-level model selection, history-based terminal prediction, and progress-guided worker models.</td><td>How does the best model/context/budget configuration depend on stage, role, observed evidence, and remaining resources?</td></tr>
-              <tr><th scope="row">Which context</th><td>Context-aware features, structured handoffs, and effective-context-window serving pools.</td><td>When should each role receive full history, a compact packet, or retrieved evidence? Does allocation change the preferred model or delegation decision?</td></tr>
-              <tr><th scope="row">Who works</th><td>Dynamic teams and joint collaboration-mode, role, and model allocation.</td><td>At a checkpoint, does adding a bounded worker help more than continuing centrally, after paying for its context, coordination, and merge?</td></tr>
-              <tr><th scope="row">What value</th><td>Risk/progress proxies, terminal targets, and downstream branch validation.</td><td>Can executed alternative allocations predict remaining-episode benefit across ordinary, stalled, and recovery states better than cheaper proxies?</td></tr>
-              <tr><th scope="row">What interaction</th><td>Component methods and existing joint orchestrators provide strong comparators.</td><td>Does a checkpoint controller improve over a composed timing + model + context + role policy under the same pool, data, scaffold, and total budget?</td></tr>
-            </tbody>
-          </table>
-        </div>
-        <div class="gap-claim reveal">
-          <article><span>Overarching, falsifiable hypothesis</span><p>Execution evidence can support selective model–context assignments and bounded delegation that improve the episode success–cost–latency frontier over task-only, per-call, fixed-role, and composed-policy baselines. Each phase tests one part; the integrated phase must show value beyond its independently tuned components.</p></article>
-          <article><span>Clear falsifier</span><p>If a per-call policy with a stay action, fixed model/context/role table, or simple composition matches the learned controller after all overhead is counted, the corresponding learned allocation is not justified. A joint controller must earn its complexity; more decision axes alone are not a contribution.</p></article>
-        </div>
-        <aside class="closest-work reveal"><strong>Broad vision, specific evidence</strong><p>Recovery is one informative checkpoint case, not the whole research problem. The gap remains provisional: the phased studies may contribute a dataset, an allocation mechanism, a negative result, or evidence that simple policies suffice. They do not establish that prior art lacks long-horizon or joint routing.</p></aside>
 
-        <div class="horizon-heading reveal">
-          <p class="kicker">Mechanisms to investigate</p><h3>Why a request router may need different training—not why all per-call routers fail.</h3>
-          <p>A history-aware, outcome-trained per-call policy can represent many checkpoint policies. Sparse decisions do not have greater expressive power by themselves. Any advantage must come from learning efficiency, measured overhead, or better treatment of state and handoffs.</p>
+        <div class="gap-focus reveal">
+          <span class="phase-tag">One research direction</span>
+          <h3>Use checkpoint evidence to decide when—and how—to reallocate.</h3>
+          <p><b>Allocation</b> means which agents run, their models, their evidence packets, and their supported reasoning/token budgets—all under shared resource limits.</p>
+          <p><b>The gap to test:</b> can a checkpoint controller preserve task completion while lowering episode cost within a latency budget, beyond matched request-level, history-aware per-call, fixed-allocation, and composed-policy baselines?</p>
+          <p class="gap-scenario"><b>For example:</b> a visible test failure might call for better context, a model change, a focused worker, or simply continuing the current plan. The failure alone does not tell us which response helps. The same allocation question also applies to ordinary progress and planned transitions—not just recovery.</p>
         </div>
-        <div class="horizon-grid reveal">
-          <article><span>01 · Missing evidence</span><h4>The opening request is incomplete.</h4><p>Test whether repository and tool evidence add predictive value beyond the task description. <a href="https://arxiv.org/html/2607.00053v1" target="_blank" rel="noreferrer">SWE-Router</a> motivates exploratory information; its idealized analysis does not guarantee net savings for a finite learned router.</p></article>
-          <article><span>02 · Wrong target</span><h4>Risk is not intervention benefit.</h4><p>A visible failure may be easy for Cheap to fix, or impossible for Strong to recover. Predict each continuation’s outcome, not just the next response’s correctness. MTRouter already uses terminal supervision.</p></article>
-          <article><span>03 · Policy shift</span><h4>Routing changes future states.</h4><p>Cheap, Strong, and mixed policies visit different workspaces and histories. Offline checkpoint results need a fresh closed-loop test; they are not automatically valid for every induced trajectory.</p></article>
-          <article><span>04 · Handoff information</span><h4>Compression can remove useful evidence.</h4><p>Measure loss of failed attempts, constraints, file references, and provenance in textual handoffs. Do not assume an invisible, persistent internal “plan” is lost between ordinary stateless model calls.</p></article>
-          <article><span>05 · Real resources</span><h4>Switching need not be free—or frequent.</h4><p>Model changes may require cache re-computation, depending on provider and cache policy. A per-call controller can repeatedly stay. Compare actual cache hits, encoder/gate time, and transfer cost.</p></article>
-          <article><span>06 · Delayed outcomes</span><h4>Good-looking progress can mislead.</h4><p>Terminal execution tests can disagree with local quality or progress scores. Restoring a common snapshot and executing alternative continuations estimates a local intervention effect under a specified protocol.</p></article>
+
+        <div class="gap-path-heading reveal"><p class="kicker">One argument, three connected steps</p><h3>Execution evidence → allocation choice → episode value.</h3></div>
+        <ol class="gap-path" role="list" aria-label="Three connected parts of the research argument">
+          <li class="reveal">
+            <span class="gap-step">01 · Execution evidence</span>
+            <h4>Does new evidence change the right choice?</h4>
+            <p>Repository discoveries, tool results, progress, and worker reports can inform the next allocation. Test their value beyond the opening request; compare checkpoint timing with an equally informed per-call policy allowed to stay. <a href="https://arxiv.org/html/2607.00053v1" target="_blank" rel="noreferrer">SWE-Router</a> grounds the exploratory-evidence comparison.</p>
+          </li>
+          <li class="reveal">
+            <span class="gap-step">02 · Allocation choice</span>
+            <h4>Which feasible combination should run next?</h4>
+            <p>A compact packet may change the preferred model; a worker may change what the coordinator needs to do. Test model–context and bounded-worker interactions, rather than assuming independently tuned choices compose well. Context capacity and the evidence actually sent remain distinct.</p>
+          </li>
+          <li class="reveal">
+            <span class="gap-step">03 · Episode value</span>
+            <h4>Does the choice earn its full cost?</h4>
+            <p>Measure alternative continuations from the same checkpoint and remaining resources, then test the frozen policy in fresh episodes. Judge final success, spend, and wall time—not risk or local progress alone. Charge routing, context/cache transfer, failed attempts, coordination, and merging.</p>
+          </li>
+        </ol>
+
+        <div class="gap-claim reveal">
+          <article><span>What would support the hypothesis?</span><p>Lower total episode cost at a predeclared task-completion margin and latency budget, against strong baselines with matched evidence, pool, scaffold, and training resources. The integrated phase must show additional value beyond independently tuned, composed component policies. <a href="#evaluation">Section 8 defines the evaluation.</a></p></article>
+          <article><span>What would argue against it?</span><p>If an equally informed per-call policy with a stay action, fixed allocation, or simple composition matches the learned policy after all overhead, the corresponding learned complexity is not justified. Sparse checkpoints are not inherently more expressive than per-call control.</p></article>
         </div>
+
+        <div class="gap-experiment reveal"><b>One agenda, phased evidence:</b> measure model continuation value and timing → vary model/context → introduce bounded workers → test integrated versus composed control. <a href="#phases">The four phases</a> make the experiments tractable; each can yield a useful mechanism, dataset, or negative result without requiring the final integrated controller to win.</div>
+        <aside class="closest-work reveal"><strong>Positioning boundary</strong><p>This is a provisional, setting-specific gap—not a claim that prior art lacks long-horizon routing or joint orchestration. The contribution must be evidence of net allocation value, not merely adding more decisions to one controller.</p></aside>
       </section>
 
       <section class="section section-dark" id="formalization">
