@@ -1,19 +1,9 @@
 const header = document.querySelector("[data-header]");
 const reveals = document.querySelectorAll(".reveal");
 const mobileNav = document.querySelector("[data-mobile-nav]");
-const navLinks = [...document.querySelectorAll(".desktop-nav a, .mobile-nav nav a")];
-const sections = [...document.querySelectorAll("main section[id]")];
 
 const setHeaderState = () => {
   header?.classList.toggle("is-scrolled", window.scrollY > 24);
-  const marker = (header?.offsetHeight ?? 72) + 32;
-  const current = [...sections].reverse().find((section) => section.getBoundingClientRect().top <= marker);
-  navLinks.forEach((link) => {
-    const active = link.getAttribute("href") === `#${current?.id}`;
-    link.classList.toggle("is-active", active);
-    if (active) link.setAttribute("aria-current", "location");
-    else link.removeAttribute("aria-current");
-  });
 };
 
 setHeaderState();

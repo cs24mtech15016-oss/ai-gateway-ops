@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="CheckpointRouter: checkpoint-aware model, context, and budget routing for single-agent long-horizon sessions, with a phased experimental plan." />
+    <meta name="theme-color" content="#111714" />
+    <meta property="og:title" content="CheckpointRouter — Long-Horizon Agent Routing" />
+    <meta property="og:description" content="Selective model and context routing for a single long-horizon agent at meaningful execution checkpoints. Bounded experimental phases." />
+    <meta property="og:type" content="website" />
+    <title>Method, data and context opportunities — CheckpointRouter</title>
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="styles.css" />
+    <script src="app.js" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header" data-header>
+      <a class="brand" href="index.html" aria-label="CheckpointRouter home">
+        <span class="brand-mark" aria-hidden="true">CR</span><span>CheckpointRouter</span>
+      </a>
+      <nav class="desktop-nav" aria-label="Primary navigation">
+        <a href="index.html">Overview</a><a href="prior-art.html">Prior art</a><a href="rubric.html">Rubric</a><a href="research.html">Gap & math</a><a href="method.html" aria-current="page" class="is-active">Method</a><a href="evaluation.html">Evaluation</a><a href="sources.html">Sources</a>
+      </nav>
+      <details class="mobile-nav" data-mobile-nav>
+        <summary>Contents</summary>
+        <nav aria-label="Mobile navigation">
+          <a href="index.html">Overview</a><a href="prior-art.html">Prior art</a><a href="rubric.html">Rubric</a><a href="research.html">Gap & math</a><a href="method.html" aria-current="page" class="is-active">Method</a><a href="evaluation.html">Evaluation</a><a href="sources.html">Sources</a>
+        </nav>
+      </details>
+      <a class="header-cta" href="https://github.com/cs24mtech15016-oss/ai-gateway-ops" target="_blank" rel="noreferrer">
+        View repository <span aria-hidden="true">↗</span>
+      </a>
+    </header>
+
+    <main id="main">
+      <section class="section page-first section-light" id="method">
+        <div class="section-heading reveal"><span class="section-number">07</span><div>
+          <p class="kicker">Method and phases</p><h2>Keep the research vision. Bound each experiment.</h2>
+          <p class="section-intro">The phases separate timing and model/context allocation before testing their interaction, all within one agent session. They scope implementation and evidence—not the overarching research statement.</p>
+        </div></div>
+        <div class="phases reveal" id="phases" aria-label="Three experimental phases for single-agent sessions">
+          <article><span class="phase-tag">Phase 1 · Model control</span><h3>Checkpoint evidence + timing</h3><p>One agent, two models, fixed tools and budgets. First measure four continuations from a sampled checkpoint; then compare fixed-prefix, per-call, and adaptive one-way handoff using a matched value model.</p><p><b>Evidence:</b> continuation value, recovery/no-intervention strata, timing overhead, and terminal success–cost curves.</p></article>
+          <article><span class="phase-tag">Phase 2 · Context allocation</span><h3>Model × context pool</h3><p>A bounded two/three-model pool with different context capacities and two predefined full/compact packet policies. Keep reasoning settings fixed; compare fixed, independently tuned, and joint model/context assignments.</p><p><b>Evidence:</b> context sufficiency, actual token/cache use, and whether context choice changes the preferred model.</p></article>
+          <article><span class="phase-tag">Phase 3 · Integrated control</span><h3>Test the coupled decisions</h3><p>Combine validated timing and model/context choices with repeated, reversible revisions inside one session, respecting tool-loop and provider-state locks. Compare a learned controller with composed component policies. Add a small reasoning-budget menu only in a separate ablation if justified.</p><p><b>Evidence:</b> interaction gains beyond components, switch frequency, reliability under session caps, and net deployment benefit.</p></article>
+        </div>
+        <aside class="closest-work reveal"><strong>First executable study: Phase 1a, not the entire proposal</strong><p>One software agent, one Cheap/Strong pair, an immutable scaffold, and at most one intervention. Sample checkpoints across normal progress, planning/testing transitions, and stalled states. The four branches below make outcome collection tractable; model labels describe measured capability/cost in this setting, not universal rankings.</p></aside>
+        <div class="pipeline reveal">
+          <article><span>01</span><h3>Split + run</h3><p>Partition repositories/tasks first. Collect Cheap prefixes without hidden-test feedback.</p></article><i aria-hidden="true">→</i>
+          <article><span>02</span><h3>Snapshot</h3><p>Restore files, tool state, history, and the same remaining resources.</p></article><i aria-hidden="true">→</i>
+          <article><span>03</span><h3>Branch</h3><p>Run all feasible continuation variants with repeated stochastic trials.</p></article><i aria-hidden="true">→</i>
+          <article><span>04</span><h3>Measure</h3><p>Record terminal execution tests, spend, elapsed time, and handoff overhead.</p></article><i aria-hidden="true">→</i>
+          <article><span>05</span><h3>Predict</h3><p>Calibrate small action-conditioned predictors; freeze choices before test.</p></article>
+        </div>
+        <div class="branch-grid reveal" aria-label="Phase 1a: four fixed continuation protocols">
+          <article><span class="phase-tag">A · Control</span><h3>Continue Cheap</h3><p>Keep the same workspace and full allowable history. Cheap runs to termination; no later escalation in the single-checkpoint experiment.</p></article>
+          <article><span class="phase-tag">B · In-place continuation</span><h3>Strong + full history</h3><p>Restore the checkpoint. Strong receives the full permitted history and completes the task without further routing.</p></article>
+          <article><span class="phase-tag">C · Context intervention</span><h3>Strong + compact handoff</h3><p>Use the same workspace, but a fixed, token-capped packet: goal, current diff, visible failures, constraints, attempted fixes, and evidence references. Charge packet construction and verification.</p></article>
+          <article><span class="phase-tag">D · Clean restart</span><h3>Strong + initial task</h3><p>Restore the original sandbox, not the edited checkpoint. Give the original task only. Prefix spend and elapsed time remain sunk; restart receives the residual budget, not a fresh episode.</p></article>
+        </div>
+        <div class="protocol-grid reveal">
+          <article><h3>What a snapshot must preserve</h3><p>Base commit and workspace changes; container/dependency state; working directory and relevant shell/tool state; tool outputs and agent messages; random/configuration metadata; elapsed time and remaining spend/turn/tool limits. Snapshot only at quiescent tool boundaries. Test replay equivalence before trusting comparisons.</p><p>If a process or external service cannot be cloned consistently, restrict or document it. Do not silently call a message transcript a restorable environment.</p></article>
+          <article><h3>Sampling without hindsight leakage</h3><p>Include early, middle, and late checkpoints; stalled/error states; and normal low-risk/successful controls. Sample using visible prefix evidence. If final outcomes stratify analysis or sampling, keep them out of model inputs and report sampling weights and the resulting coverage.</p><p>All sibling checkpoints/branches stay in their task’s split. Group related issues and near-duplicates; hold out repositories where possible. Branch labels come from hidden terminal tests unavailable to the online router.</p></article>
+          <article><h3>Comparability and uncertainty</h3><p>Fix system prompts, tools, model versions, token limits, and stopping rules. Use a common residual spend/deadline and documented residual turn/tool caps. Do not force equal completion lengths; extra recovery steps are charged. Reserve worst-case call cost before dispatch and enforce caps.</p><p>Repeat stochastic continuations with recorded seeds where supported. Store each trial, not just the best outcome; use uncertainty intervals and test calibration. Differences identify effects in this controlled snapshot population—not general causal effects on all tasks.</p></article>
+          <article><h3>Learn the simplest useful model</h3><p>Start with tabular diagnostics plus a frozen history embedding, then logistic/gradient-boosted outcome and resource predictors. Fit per-action success likelihoods and cost/time regressions; select feasible actions using calibrated utility. Compare task-only and risk/progress proxies with equal capacity and training volume.</p><p>Feature extraction, gate inference, and serialization are deployment costs. No prefill activation access, new foundation-model training, or multi-agent orchestration is required.</p></article>
+        </div>
+
+      </section>
+      <section class="section section-paper" id="data">
+        <div class="section-heading reveal"><span class="section-number">08</span><div>
+          <p class="kicker">Data</p><h2>Existing tasks and traces help. Checkpoint outcomes still need collection.</h2>
+          <p class="section-intro">Use public resources as task, trajectory, or baseline inputs—not as interchangeable sources of alternative-allocation outcomes. Start with Phase 1 continuations; extend the schema for model/context assignments in later phases.</p>
+        </div></div>
+        <div class="data-grid reveal">
+          <a href="https://huggingface.co/SWE-Router" target="_blank" rel="noreferrer"><strong>SWE-Router resources</strong><span>Task/trajectory collections and value heads. Inspect each card and split; these are not automatically our four restoration branches.</span><i aria-hidden="true">↗</i></a>
+          <a href="https://github.com/CommonstackAI/TwinRouterBench" target="_blank" rel="noreferrer"><strong>TwinRouterBench</strong><span>Static routing data and live agent harness. Useful for downstream branch validation and cache-aware accounting; inspect checkpoint distribution.</span><i aria-hidden="true">↗</i></a>
+          <a href="https://huggingface.co/datasets/SWE-bench/SWE-smith-trajectories" target="_blank" rel="noreferrer"><strong>SWE-smith trajectories</strong><span>Software-agent task/trace material. Reconstruct environments and check permissions before creating new continuations.</span><i aria-hidden="true">↗</i></a>
+          <a href="https://huggingface.co/SWE-Gym/datasets" target="_blank" rel="noreferrer"><strong>SWE-Gym datasets</strong><span>Executable software tasks and training resources. Candidate task source for controlled checkpoint collection.</span><i aria-hidden="true">↗</i></a>
+          <a href="https://huggingface.co/datasets/JetBrains-Research/agent-trajectories-swesmith-random-subset" target="_blank" rel="noreferrer"><strong>JetBrains mixed-model traces</strong><span>Messages, selected-model records, and resolved labels support feature audits. Logged routes alone do not reveal alternative intervention outcomes.</span><i aria-hidden="true">↗</i></a>
+          <a href="https://huggingface.co/datasets/nvidia/Open-SWE-Traces" target="_blank" rel="noreferrer"><strong>Open-SWE-Traces</strong><span>Additional software-agent traces for state representation experiments. Validate scaffolds, contamination, and restorability.</span><i aria-hidden="true">↗</i></a>
+          <a href="https://huggingface.co/datasets/NJU-LINK/CodeTraceBench" target="_blank" rel="noreferrer"><strong>CodeTraceBench</strong><span>Trajectory/error analysis material; distinguish the curated verified subset from other splits. Error labels are not rescue values.</span><i aria-hidden="true">↗</i></a>
+          <a href="https://github.com/ynulihao/LLMRouterBench" target="_blank" rel="noreferrer"><strong>LLMRouterBench + Avengers-Pro</strong><span>Offline request-level router reproduction and model-pool analysis. It does not provide persistent software-workspace recovery labels.</span><i aria-hidden="true">↗</i></a>
+          <a href="https://huggingface.co/datasets/ulab-ai/Router-R1-Router-Dataset" target="_blank" rel="noreferrer"><strong>Router-R1 training data</strong><span>Sequential QA routing material. Useful background, but not a substitute for tool-state recovery supervision.</span><i aria-hidden="true">↗</i></a>
+        </div>
+        <aside class="data-caveat reveal"><b>Proposed new record:</b> task/repository split, immutable environment fingerprint, checkpoint observations, restoration instructions, remaining resources, action/handoff definition, model/configuration version, and every continuation’s outcome, usage, timing, and seed. Later phases add context packets/capacities, cache state, and the sequence of revisions within the session. Release only redistributable, sanitized artifacts; inspect code, logs, and credentials before publication. Preserve failed and no-rescue cases.</aside>
+      </section>
+      <section class="section section-accent" id="opportunity">
+        <div class="section-heading reveal"><span class="section-number">09</span><div>
+          <p class="kicker">Core opportunity: model × context pools</p><h2>Match resources to the session as it evolves.</h2>
+          <p class="section-intro">Context allocation for the single agent is the central opportunity, scoped in Phases 2–3. Routed handoffs and session-aware routers are grounding and comparators—not capabilities to claim as new.</p>
+        </div></div>
+        <div class="opportunity-grid reveal">
+          <article><span>01</span><h3>Model × context configuration</h3><p>A long-native-context model, a cheaper short-context model with a compact packet, and the same model with more history can yield different remaining-episode values. Hold task/scaffold fixed and separate model capability from packet length and content.</p></article>
+          <article><span>02</span><h3>Preserve evidence, not just tokens</h3><p>Compare raw history, structured evidence packets, retrieval, and structured handoffs. Measure omitted constraints and provenance, packet creation cost, and terminal outcomes—not only compression ratio.</p></article>
+          <article><span>03</span><h3>Cache-aware switching</h3><p>A switch discards the warm prefix cache; with cache reads at a fraction of base input price, the target must be much cheaper to pay back the re-read. Measure actual cache loss per switch and let it enter the continuation value rather than a fixed penalty.</p></article>
+          <article><span>04</span><h3>Continuity boundaries</h3><p>Tool loops and provider-held state make some checkpoints non-switchable. Restrict revisions to quiescent turn boundaries and measure how often a lock blocks a revision the policy would have taken.</p></article>
+          <article><span>05</span><h3>Serving-aware constraints</h3><p>Record actual input/output/cache tokens, queue time, and effective context limits. For self-hosted pools, benchmark KV memory and concurrency on the target stack rather than treating a simulation’s throughput assumptions as universal.</p></article>
+          <article><span>06</span><h3>Reasoning budget as a lever</h3><p>Keeping the model and raising or lowering its reasoning budget avoids a cache-breaking switch. Test a small effort menu only after Phases 1–2, and compare it with a model change at the same checkpoint.</p></article>
+        </div>
+        <div class="context-note reveal"><b>Three different notions:</b> a model’s native maximum context, the actual evidence packet supplied to it, and a serving pool’s configured/effective window. A larger allowed window is not automatically a larger API bill; actual token/cache usage and provider rules determine it. FleetOpt’s analytical pool results and <a href="https://arxiv.org/abs/2307.03172" target="_blank" rel="noreferrer">Lost in the Middle</a> motivate measurements, not guaranteed savings or universal claims about modern models.</div>
+      </section>
+    </main>
+    <nav class="pager" aria-label="Page navigation"><a class="pager-prev" href="research.html"><small>← Previous</small><strong>Research gap and mathematics</strong></a><a class="pager-next" href="evaluation.html"><small>Next →</small><strong>Evaluation and contributions</strong></a></nav>
+
+    <footer>
+      <div><span class="brand-mark" aria-hidden="true">CR</span><div><strong>CheckpointRouter</strong><p>Selective routing for single-agent long-horizon sessions.</p></div></div>
+      <div class="footer-links"><a href="#main">Back to top ↑</a><a href="https://github.com/cs24mtech15016-oss/ai-gateway-ops" target="_blank" rel="noreferrer">Repository ↗</a></div>
+    </footer>
+  </body>
+</html>

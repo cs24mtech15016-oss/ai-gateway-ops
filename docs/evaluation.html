@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="CheckpointRouter: checkpoint-aware model, context, and budget routing for single-agent long-horizon sessions, with a phased experimental plan." />
+    <meta name="theme-color" content="#111714" />
+    <meta property="og:title" content="CheckpointRouter — Long-Horizon Agent Routing" />
+    <meta property="og:description" content="Selective model and context routing for a single long-horizon agent at meaningful execution checkpoints. Bounded experimental phases." />
+    <meta property="og:type" content="website" />
+    <title>Evaluation and contributions — CheckpointRouter</title>
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="styles.css" />
+    <script src="app.js" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header" data-header>
+      <a class="brand" href="index.html" aria-label="CheckpointRouter home">
+        <span class="brand-mark" aria-hidden="true">CR</span><span>CheckpointRouter</span>
+      </a>
+      <nav class="desktop-nav" aria-label="Primary navigation">
+        <a href="index.html">Overview</a><a href="prior-art.html">Prior art</a><a href="rubric.html">Rubric</a><a href="research.html">Gap & math</a><a href="method.html">Method</a><a href="evaluation.html" aria-current="page" class="is-active">Evaluation</a><a href="sources.html">Sources</a>
+      </nav>
+      <details class="mobile-nav" data-mobile-nav>
+        <summary>Contents</summary>
+        <nav aria-label="Mobile navigation">
+          <a href="index.html">Overview</a><a href="prior-art.html">Prior art</a><a href="rubric.html">Rubric</a><a href="research.html">Gap & math</a><a href="method.html">Method</a><a href="evaluation.html" aria-current="page" class="is-active">Evaluation</a><a href="sources.html">Sources</a>
+        </nav>
+      </details>
+      <a class="header-cta" href="https://github.com/cs24mtech15016-oss/ai-gateway-ops" target="_blank" rel="noreferrer">
+        View repository <span aria-hidden="true">↗</span>
+      </a>
+    </header>
+
+    <main id="main">
+      <section class="section page-first section-dark" id="evaluation">
+        <div class="section-heading reveal"><span class="section-number">10</span><div>
+          <p class="kicker">Evaluation</p><h2>Test the claim—not a weaker opponent.</h2>
+          <p class="section-intro">Each phase has a matched action space and baselines. Offline prediction is diagnostic; the decisive result is a fresh, closed-loop episode comparison including routing, context-transfer, and cache-loss overhead.</p>
+        </div></div>
+        <div class="evaluation-layout reveal">
+          <div><h3>Required comparison families</h3>
+            <ol class="baseline-list">
+              <li><b>Always Cheap / always Strong:</b> initial-state endpoints under identical scaffold and episode caps.</li>
+              <li><b>Task-only and simple rules:</b> initial Strong-success/difficulty predictors, repeated-failure escalation, and fixed stage/model tables where applicable.</li>
+              <li><b>Avengers-Pro:</b> original-request, retrained per-call, and retrained checkpoint-state variants.</li>
+              <li><b>vLLM Semantic Router (session-aware):</b> a versioned, explicitly configured baseline with its tool-loop/provider-state locks, cache-aware switch cost, and resets—not an unspecified product label.</li>
+              <li><b>SWE-Router-like fixed prefix:</b> development-selected prefix length and continue/restart threshold.</li>
+              <li><b>TACIT-Switch-style handoff:</b> paired-rollout/teacher-interval supervision under matched tasks, with annotation cost disclosed.</li>
+              <li><b>ReDAct-style deferral:</b> local uncertainty/risk intervention followed by Cheap; distinguish faithful reproduction from a logit-free analogue.</li>
+              <li><b>MTRouter-like outcome-aware per-call:</b> history and terminal labels, with a stay action. Equalize available state, model pool, and training budget.</li>
+              <li><b>Phase 2 context policies:</b> always-full, fixed compact/retrieval packets, and independently tuned model/context selectors versus joint selection.</li>
+              <li><b>Phase 3 composed controller:</b> independently tuned timing + model + context policies, under the same evidence, data, pool, and session caps as the integrated learner.</li>
+            </ol>
+          </div>
+          <div><h3>What to measure</h3><div class="metric-grid">
+            <article><strong>Terminal success</strong><span>Executable task checks; no LLM judge as the only correctness criterion.</span></article>
+            <article><strong>Total episode spend</strong><span>Prefix, failed attempts, handoff generation, cache reads/writes, routing, and tools.</span></article>
+            <article><strong>Wall time + tails</strong><span>End-to-end latency, p50/p95, transfer time, tool waits, and cap violations.</span></article>
+            <article><strong>Allocation value</strong><span>Continuation/recovery value in Phase 1; context and budget effects across session stage later.</span></article>
+            <article><strong>Prediction quality</strong><span>Per-action calibration, Brier/log loss, ranking error, and uncertainty—not accuracy alone.</span></article>
+            <article><strong>Decision overhead</strong><span>Encoder, gate, value prediction, serialization, and cache re-computation separately.</span></article>
+            <article><strong>Routing behavior</strong><span>Timing, stay/switch choices, context size, restart, and switch frequency.</span></article>
+            <article><strong>Generalization</strong><span>Held-out repositories/tasks, policy-induced states, and a later model-pair transfer test.</span></article>
+            <article><strong>Context efficiency</strong><span>Packet sufficiency, token/cache use, omitted evidence, and native/pool capacity separately.</span></article>
+            <article><strong>Session continuity</strong><span>Cache hits lost on switch, re-read tokens, lock-blocked switches, and switch thrash.</span></article>
+          </div></div>
+        </div>
+        <div class="headline-metric reveal"><span>Primary operating point</span><strong>Minimize total cost subject to a predeclared non-inferiority margin on terminal success, with an explicit latency budget.</strong></div>
+        <div class="evaluation-notes reveal">
+          <article><h3>Matched ablations</h3><p>Hold state encoding and value prediction fixed across timing ablations in Phase 1. Phase 2 crosses model and context choices while fixing the reasoning budget. Phase 3 compares component policies, their simple composition, and the integrated controller. Report training volume and all overhead; do not attribute representation or extra-data gains to timing.</p></article>
+          <article><h3>Statistical discipline</h3><p>Choose prices, budgets, margins, thresholds, and primary outcomes before test evaluation. Use repeated runs and task/repository-clustered paired confidence intervals. Report absolute success-rate loss and cost reduction, failures, and all operating points; tune only on development data.</p><p>If reporting “retain 95% or 98% of Strong’s success,” define it as a <em>relative success-rate target</em>, not 95% task accuracy. Do not promise exact equality or superiority in advance.</p></article>
+        </div>
+      </section>
+      <section class="section section-light" id="oracle">
+        <div class="section-heading reveal"><span class="section-number">11</span><div>
+          <p class="kicker">Oracle and cost</p><h2>Hindsight is a diagnostic—not a deployable policy.</h2>
+          <p class="section-intro">A request-level “perfect oracle” uses known candidate outcomes. Here the diagnostic chooses among only the sampled checkpoint actions under their stated continuation protocols. Report it separately by phase and action menu; a Phase 1 selector says nothing about the optimum multi-revision policy.</p>
+        </div></div>
+        <div class="oracle-grid reveal">
+          <article><h3>Define the local hindsight selector</h3><div class="math-line">a*<sub>i</sub> = argmax<sub>a ∈ A<sub>i</sub></sub> [p̂<sup>select</sup><sub>ia</sub> − λĉ<sup>select</sup><sub>ia</sub> − ηℓ̂<sup>select</sup><sub>ia</sub>]</div><p>A<sub>i</sub> contains sampled feasible branches. Estimate success probability and mean resource use with repeated continuations; specify tie-breaking. Select with one repetition set and report with independent repetitions to reduce winner’s-curse bias.</p><p>Report every checkpoint, including cases where no branch succeeds. One lucky success among many rollouts is not the allocation’s expected success probability.</p></article>
+          <article><h3>Keep three numbers separate</h3><p><b>Deployment route cost:</b> sunk prefix + selected remaining branch cost (including its transfer) + router overhead not already included. Never charge handoff twice.</p><p><b>Data-collection cost:</b> actual prefix runs + <em>all</em> branch continuations and repetitions + snapshots, infrastructure, annotations, and evaluation. Do not sum the prefix again for each clone.</p><p><b>Diagnostic performance:</b> independent outcome estimates for the selected sampled branch. A budget-constrained selector and an unconstrained success oracle are different diagnostics.</p></article>
+        </div>
+        <aside class="honesty-note reveal"><strong>Not a global upper bound</strong><p>This selector sees hindsight estimates only for the collected states and actions. It does not optimize every possible future policy, model, or context packet; finite noisy estimates may even underperform another policy. Call it a <b>sampled-branch hindsight diagnostic</b>, not a proven full-episode oracle ceiling.</p></aside>
+      </section>
+      <section class="section section-paper" id="feasibility">
+        <div class="section-heading reveal"><span class="section-number">12</span><div><p class="kicker">Feasibility</p><h2>Practical to pilot. Not yet justified to scale.</h2></div></div>
+        <div class="feasibility-grid reveal">
+          <article class="feasibility-positive"><span>A credible first experiment</span><h3>Small action space</h3><ul><li>One agent, two measured model endpoints.</li><li>A measured continuation menu before adaptive timing.</li><li>Quiescent, reproducible software sandboxes.</li><li>Small supervised predictors before complex RL.</li><li>A pilot sized to measure effect and noise before committing a larger data budget.</li></ul></article>
+          <article class="feasibility-negative"><span>Not yet a credible promise</span><h3>Unbounded control</h3><ul><li>Multi-agent graphs and arbitrary model pools.</li><li>Exhaustive branching across a whole episode.</li><li>Guaranteed frontier success at lower cost.</li><li>Assumed millisecond end-to-end router latency.</li><li>A fixed dollar budget derived from an unmeasured per-rollout price.</li></ul></article>
+          <article class="cost-card"><span>Measure before budgeting</span><h3>Collection bill</h3><div class="cost-equation">prefix runs<br />+ Σ continuation trials<br />+ infrastructure<br />+ annotation / evaluation</div><p>Use pilot token/cache usage and runtimes for mean and tail estimates. Prices, model versions, repeated trials, failed branches, storage, and snapshot restoration must appear in the estimate.</p></article>
+        </div>
+        <aside class="honest-answer reveal"><strong>Go / no-go decision</strong><p>Evaluate each phase on its own incremental value and its stated dependencies. Scale a learned allocation only if it generalizes and improves terminal outcomes after routing, context-transfer, or cache-loss costs. A negative recovery result does not by itself invalidate context allocation; investigate those questions without assuming the failed component helps. Prefer simple rules where they match performance, and stop expanding the action space when its added complexity is not justified.</p></aside>
+      </section>
+      <section class="section section-light" id="contributions">
+        <div class="section-heading reveal"><span class="section-number">13</span><div><p class="kicker">Proposed contributions</p><h2>Evidence first. Algorithmic novelty only if earned.</h2></div></div>
+        <div class="contribution-list reveal">
+          <article><span>01</span><p>A phased checkpoint dataset with reproducible state restoration, model/context allocation definitions, repeated outcomes, and complete resource accounting.</p></article>
+          <article><span>02</span><p>Evidence about which execution signals justify revising resource allocations, including—but not limited to—recovery, and how timing interacts with context needs.</p></article>
+          <article><span>03</span><p>A checkpoint controller evaluated against single-pass, per-call, fixed-prefix, adaptive-handoff, session-aware, and composed policies under matched phased action spaces.</p></article>
+          <article><span>04</span><p>Controlled tests of model–context effects within one agent session, plus evidence for or against integrating them under a shared episode budget.</p></article>
+        </div>
+        <p class="reviewed">Status: research formulation. No checkpoint controller, phased checkpoint dataset, or claimed success–cost result has been implemented in this repository.</p>
+      </section>
+    </main>
+    <nav class="pager" aria-label="Page navigation"><a class="pager-prev" href="method.html"><small>← Previous</small><strong>Method, data and context opportunities</strong></a><a class="pager-next" href="sources.html"><small>Next →</small><strong>Sources</strong></a></nav>
+
+    <footer>
+      <div><span class="brand-mark" aria-hidden="true">CR</span><div><strong>CheckpointRouter</strong><p>Selective routing for single-agent long-horizon sessions.</p></div></div>
+      <div class="footer-links"><a href="#main">Back to top ↑</a><a href="https://github.com/cs24mtech15016-oss/ai-gateway-ops" target="_blank" rel="noreferrer">Repository ↗</a></div>
+    </footer>
+  </body>
+</html>

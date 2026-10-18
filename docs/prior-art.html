@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="CheckpointRouter: checkpoint-aware model, context, and budget routing for single-agent long-horizon sessions, with a phased experimental plan." />
+    <meta name="theme-color" content="#111714" />
+    <meta property="og:title" content="CheckpointRouter — Long-Horizon Agent Routing" />
+    <meta property="og:description" content="Selective model and context routing for a single long-horizon agent at meaningful execution checkpoints. Bounded experimental phases." />
+    <meta property="og:type" content="website" />
+    <title>Prior art — CheckpointRouter</title>
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="styles.css" />
+    <script src="app.js" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header" data-header>
+      <a class="brand" href="index.html" aria-label="CheckpointRouter home">
+        <span class="brand-mark" aria-hidden="true">CR</span><span>CheckpointRouter</span>
+      </a>
+      <nav class="desktop-nav" aria-label="Primary navigation">
+        <a href="index.html">Overview</a><a href="prior-art.html" aria-current="page" class="is-active">Prior art</a><a href="rubric.html">Rubric</a><a href="research.html">Gap & math</a><a href="method.html">Method</a><a href="evaluation.html">Evaluation</a><a href="sources.html">Sources</a>
+      </nav>
+      <details class="mobile-nav" data-mobile-nav>
+        <summary>Contents</summary>
+        <nav aria-label="Mobile navigation">
+          <a href="index.html">Overview</a><a href="prior-art.html" aria-current="page" class="is-active">Prior art</a><a href="rubric.html">Rubric</a><a href="research.html">Gap & math</a><a href="method.html">Method</a><a href="evaluation.html">Evaluation</a><a href="sources.html">Sources</a>
+        </nav>
+      </details>
+      <a class="header-cta" href="https://github.com/cs24mtech15016-oss/ai-gateway-ops" target="_blank" rel="noreferrer">
+        View repository <span aria-hidden="true">↗</span>
+      </a>
+    </header>
+
+    <main id="main">
+      <section class="section page-first section-light" id="prior-art">
+        <div class="section-heading reveal"><span class="section-number">03</span><div>
+          <p class="kicker">Prior art</p><h2>One literature map, organized by the decision.</h2>
+          <p class="section-intro">Read each family in the same way: what the work establishes, then how it informs our experiment. Request routers, long-horizon controllers, serving frameworks, and benchmarks are different kinds of prior art—not competing names for the same thing.</p>
+        </div></div>
+        <div class="literature-map">
+          <article class="literature-family reveal" aria-labelledby="literature-request">
+            <header class="literature-heading"><div><p class="kicker">A · Request and policy routing</p><h3 id="literature-request">Which model should receive this request?</h3></div><span class="phase-tag">Baselines · all phases</span></header>
+            <div class="literature-entry">
+              <div class="literature-work"><h4><a href="https://arxiv.org/abs/2508.12631v2" target="_blank" rel="noreferrer">Avengers-Pro</a></h4><small>Learned router · v2</small></div>
+              <p><b class="literature-label">Established contribution</b>Query embeddings, clusters, and model performance–efficiency scores support single-pass model selection.</p>
+              <p><b class="literature-label">Role in our study</b>Compare original-request, retrained per-call, and retrained checkpoint-state variants. Match tasks, pool, scaffold, and total budget; isolate gains from representation, labels, or extra data from gains attributed to decision timing.</p>
+            </div>
+            <div class="literature-entry">
+              <div class="literature-work"><h4><a href="https://arxiv.org/abs/2406.18665" target="_blank" rel="noreferrer">RouteLLM</a> · <a href="https://arxiv.org/abs/2508.21141" target="_blank" rel="noreferrer">PILOT</a></h4><small>Preference / bandit routers</small></div>
+              <p><b class="literature-label">Established contribution</b>RouteLLM learns a strong/weak preference trade-off; PILOT learns from contextual-bandit feedback. Their original decision unit is an incoming request.</p>
+              <p><b class="literature-label">Role in our study</b>Ground economical model selection and chosen-action feedback. Reusing these ideas at checkpoints requires state and outcome supervision appropriate to the remaining episode; it is an adaptation, not proof that request routers cannot be extended.</p>
+            </div>
+            <div class="literature-entry">
+              <div class="literature-work"><h4><a href="https://github.com/vllm-project/semantic-router/blob/main/website/docs/overview/semantic-router-overview.md" target="_blank" rel="noreferrer">vLLM Semantic Router</a></h4><small>Deployment framework · official architecture</small></div>
+              <p><b class="literature-label">Established contribution</b>Conversation/session signals, projections, policy, memory/plugins, and bounded multi-model algorithms. Session-aware routing adds tool-loop and provider-state hard locks, idle/drift resets, prefix-cache checkout cost, switch-history and handoff penalties, and replay traces. It is not merely a task classifier. The agent harness owns the task loop, tool execution, and durable workspace state.</p>
+              <p><b class="literature-label">Role in our study</b>Freeze a version and explicit signal/policy configuration; match the pool and admissible evidence. Capture checkpoints in the harness. Do not assume conversation memory is absent, or conflate logical model selection with healthy-replica scheduling. Reuse its continuity locks and cache-aware switch cost as infrastructure and as a session-aware baseline.</p>
+            </div>
+          </article>
+
+          <article class="literature-family reveal" aria-labelledby="literature-timing">
+            <header class="literature-heading"><div><p class="kicker">B · Sequential model control</p><h3 id="literature-timing">When should execution stay, defer, or switch?</h3></div><span class="phase-tag">Phase 1 · evidence + timing</span></header>
+            <div class="literature-entry">
+              <div class="literature-work"><h4><a href="https://arxiv.org/html/2608.27911v2#S2" target="_blank" rel="noreferrer">TACIT-Switch</a></h4><small>Adaptive handoff · §§2–3, 5–6 · v2</small></div>
+              <p><b class="literature-label">Established contribution</b>Adaptive permanent handoff: paired full Cheap/Strong rollouts and teacher-annotated timing intervals train a cumulative-risk threshold model. ALFWorld and DABench; a parameter-weighted call-cost proxy.</p>
+              <p><b class="literature-label">Role in our study</b>Adaptive timing already exists. Compare measured checkpoint-continuation supervision with initial Strong-success/teacher-timing supervision, disclosing annotation and deployment costs.</p>
+            </div>
+            <div class="literature-entry">
+              <div class="literature-work"><h4><a href="https://arxiv.org/html/2604.23530v1#S3" target="_blank" rel="noreferrer">MTRouter</a></h4><small>Per-turn routing · §3.3 · v1</small></div>
+              <p><b class="literature-label">Established contribution</b>History and candidate-model representations drive turn-level routing; terminal outcomes and future-error penalties provide supervision. ScienceWorld and HLE evaluation.</p>
+              <p><b class="literature-label">Role in our study</b>Terminal supervision is not our novelty. Compare checkpoint and per-call timing with matched state/outcome predictors and a stay action; only then isolate later context choices.</p>
+            </div>
+            <div class="literature-entry">
+              <div class="literature-work"><h4><a href="https://arxiv.org/html/2607.00053v1#S4" target="_blank" rel="noreferrer">SWE-Router</a></h4><small>Software-agent routing · §4, Algorithm 1 · v1</small></div>
+              <p><b class="literature-label">Established contribution</b>A fixed Cheap exploration prefix precedes a choice to continue Cheap or restart Strong from the original software task.</p>
+              <p><b class="literature-label">Role in our study</b>Use a direct fixed-prefix baseline. Separate restart from in-place continuation and adaptive timing, keeping residual-budget accounting identical.</p>
+            </div>
+            <div class="literature-entry">
+              <div class="literature-work"><h4><a href="https://arxiv.org/html/2608.24087v1#S6" target="_blank" rel="noreferrer">Bayesian Self-Escalation</a></h4><small>Optimal stopping · §§6, 8, 10 · v1</small></div>
+              <p><b class="literature-label">Established contribution</b>Stopping within generation, textual context distillation, and senior re-reading costs. The reported model experiment uses a constant-threshold policy on MBPP.</p>
+              <p><b class="literature-label">Role in our study</b>Stopping and textual transfer are established. Test persistent tool/workspace continuations and, in later phases, bounded context allocation without requiring token-level logits.</p>
+            </div>
+            <div class="literature-entry">
+              <div class="literature-work"><h4><a href="https://arxiv.org/abs/2604.07036" target="_blank" rel="noreferrer">ReDAct</a> · <a href="https://proceedings.iclr.cc/paper_files/paper/2026/hash/06b33e277e6c48f361621717c49cde22-Abstract-Conference.html" target="_blank" rel="noreferrer">TRIM</a></h4><small>Local deferral / reasoning-step control</small></div>
+              <p><b class="literature-label">Established contribution</b>ReDAct defers uncertain local decisions in ALFWorld/MiniGrid. TRIM uses reasoning-step correctness and uncertainty to allocate stronger-model effort.</p>
+              <p><b class="literature-label">Role in our study</b>Compare local risk/uncertainty intervention with remaining-episode value. Distinguish temporary deferral followed by Cheap from permanent handoff; disclose faithful reproductions versus logit-free analogues.</p>
+            </div>
+            <div class="literature-entry">
+              <div class="literature-work"><h4><a href="https://arxiv.org/html/2601.02695v1" target="_blank" rel="noreferrer">EvoRoute</a></h4><small>Feedback-driven workflow routing · v1</small></div>
+              <p><b class="literature-label">Established contribution</b>Experience and execution feedback inform quality–cost–latency routing.</p>
+              <p><b class="literature-label">Role in our study</b>Stateful feedback is not new. Test whether executed alternative continuations add useful supervision beyond cheaper progress/risk signals under matched data and capacity.</p>
+            </div>
+          </article>
+
+          <article class="literature-family reveal" aria-labelledby="literature-context">
+            <header class="literature-heading"><div><p class="kicker">C · Context and handoff</p><h3 id="literature-context">What evidence should the selected model receive?</h3></div><span class="phase-tag">Phase 2 · model × context</span></header>
+            <div class="literature-entry">
+              <div class="literature-work"><h4><a href="https://arxiv.org/abs/2608.25277" target="_blank" rel="noreferrer">Routed Graph Handoff</a></h4><small>Handoff representation</small></div>
+              <p><b class="literature-label">Established contribution</b>Selects structured dependency-graph versus natural-language handoffs.</p>
+              <p><b class="literature-label">Role in our study</b>Context transfer is prior art. Compare predefined full/compact packets and their interaction with model selection, charging construction, re-reading, and omitted-evidence effects.</p>
+            </div>
+            <div class="literature-entry">
+              <div class="literature-work"><h4><a href="https://arxiv.org/abs/2603.17280v2" target="_blank" rel="noreferrer">FleetOpt</a></h4><small>Serving-pool capacity · v2</small></div>
+              <p><b class="literature-label">Established contribution</b>Studies effective-context-window serving pools through calibrated analytical simulation.</p>
+              <p><b class="literature-label">Role in our study</b>Separate native model capacity, serving-pool limits, and the evidence actually sent. Our task-level context-allocation experiment needs executable terminal outcomes; a serving simulation is not that evidence.</p>
+            </div>
+          </article>
+
+          <article class="literature-family reveal" aria-labelledby="literature-outcomes">
+            <header class="literature-heading"><div><p class="kicker">E · Continuation data and evaluation</p><h3 id="literature-outcomes">How are alternative routes given outcome labels?</h3></div><span class="phase-tag">Data + evaluation · all phases</span></header>
+            <div class="literature-entry">
+              <div class="literature-work"><h4><a href="https://arxiv.org/html/2605.18859v4#S4" target="_blank" rel="noreferrer">TwinRouterBench</a></h4><small>Branching benchmark · §§3–5 · v4</small></div>
+              <p><b class="literature-label">Established contribution</b>Branches intermediate prefixes and verifies downstream success. Static construction starts from successful Strong traces and tests tier replacements with the same step count; live evaluation includes prompt caching.</p>
+              <p><b class="literature-label">Role in our study</b>Branching is not new. Sample ordinary and degraded Cheap-created states with repeated outcomes; later add bounded context alternatives. Compare checkpoint coverage, continuation protocol, and real cache/resource accounting.</p>
+            </div>
+          </article>
+
+          <article class="literature-family reveal" aria-labelledby="literature-background">
+            <header class="literature-heading"><div><p class="kicker">F · Foundations and orthogonal background</p><h3 id="literature-background">Useful tools—not the proposed novelty.</h3></div><span class="phase-tag">Conceptual grounding</span></header>
+            <div class="literature-entry">
+              <div class="literature-work"><h4><a href="https://arxiv.org/abs/2310.12963" target="_blank" rel="noreferrer">AutoMix</a> · <a href="https://arxiv.org/abs/2506.09033" target="_blank" rel="noreferrer">Router-R1</a> · <a href="https://arxiv.org/abs/2608.15817" target="_blank" rel="noreferrer">RLCascadeRouter</a> · <a href="https://proceedings.neurips.cc/paper_files/paper/2024/hash/a6deba3b2408af45b3f9994c2152b862-Abstract-Conference.html" target="_blank" rel="noreferrer">TREACLE</a></h4><small>Sequential-control foundations</small></div>
+              <p><b class="literature-label">Established contribution</b>Provide cascade, POMDP, and reinforcement-learning foundations for sequential cost-aware routing.</p>
+              <p><b class="literature-label">Role in our study</b>Use established decision-process tools. The experiment concerns checkpoint resource allocation in persistent tool environments, not the invention of sequential control.</p>
+            </div>
+            <div class="literature-entry">
+              <div class="literature-work"><h4><a href="https://arxiv.org/abs/2603.20895v3" target="_blank" rel="noreferrer">LLM Router</a> · <a href="https://sqwish.ai/blog/how-we-accidentally-trained-the-1-model-router" target="_blank" rel="noreferrer">Sqwish report</a></h4><small>Representation paper / engineering blog</small></div>
+              <p><b class="literature-label">Established contribution</b>LLM Router predicts target-model correctness from prefill representations. Sqwish describes model–budget outcome prediction in an engineering report.</p>
+              <p><b class="literature-label">Role in our study</b>Keep representation and budget prediction as background. The proposal requires neither prefill access nor a historical leaderboard claim; the blog is not treated as equivalent evidence to a research paper.</p>
+            </div>
+          </article>
+        </div>
+        <aside class="honesty-note reveal"><strong>What this leaves open</strong><p>Adaptive handoff, terminal-outcome learning, session continuity, and context transfer already exist. Our agenda is <b>checkpoint-timed allocation of model, context, and budget within a single agent session</b>. Its contribution must be measured allocation effects and interactions that improve on strong component and composed-policy baselines. <a href="research.html">The research gap turns these overlaps into specific, falsifiable questions.</a></p></aside>
+      </section>
+    </main>
+    <nav class="pager" aria-label="Page navigation"><a class="pager-prev" href="index.html"><small>← Previous</small><strong>Overview</strong></a><a class="pager-next" href="rubric.html"><small>Next →</small><strong>Rubric and novelty</strong></a></nav>
+
+    <footer>
+      <div><span class="brand-mark" aria-hidden="true">CR</span><div><strong>CheckpointRouter</strong><p>Selective routing for single-agent long-horizon sessions.</p></div></div>
+      <div class="footer-links"><a href="#main">Back to top ↑</a><a href="https://github.com/cs24mtech15016-oss/ai-gateway-ops" target="_blank" rel="noreferrer">Repository ↗</a></div>
+    </footer>
+  </body>
+</html>

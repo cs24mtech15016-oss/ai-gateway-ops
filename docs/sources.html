@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="CheckpointRouter: checkpoint-aware model, context, and budget routing for single-agent long-horizon sessions, with a phased experimental plan." />
+    <meta name="theme-color" content="#111714" />
+    <meta property="og:title" content="CheckpointRouter — Long-Horizon Agent Routing" />
+    <meta property="og:description" content="Selective model and context routing for a single long-horizon agent at meaningful execution checkpoints. Bounded experimental phases." />
+    <meta property="og:type" content="website" />
+    <title>Sources — CheckpointRouter</title>
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="styles.css" />
+    <script src="app.js" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header" data-header>
+      <a class="brand" href="index.html" aria-label="CheckpointRouter home">
+        <span class="brand-mark" aria-hidden="true">CR</span><span>CheckpointRouter</span>
+      </a>
+      <nav class="desktop-nav" aria-label="Primary navigation">
+        <a href="index.html">Overview</a><a href="prior-art.html">Prior art</a><a href="rubric.html">Rubric</a><a href="research.html">Gap & math</a><a href="method.html">Method</a><a href="evaluation.html">Evaluation</a><a href="sources.html" aria-current="page" class="is-active">Sources</a>
+      </nav>
+      <details class="mobile-nav" data-mobile-nav>
+        <summary>Contents</summary>
+        <nav aria-label="Mobile navigation">
+          <a href="index.html">Overview</a><a href="prior-art.html">Prior art</a><a href="rubric.html">Rubric</a><a href="research.html">Gap & math</a><a href="method.html">Method</a><a href="evaluation.html">Evaluation</a><a href="sources.html" aria-current="page" class="is-active">Sources</a>
+        </nav>
+      </details>
+      <a class="header-cta" href="https://github.com/cs24mtech15016-oss/ai-gateway-ops" target="_blank" rel="noreferrer">
+        View repository <span aria-hidden="true">↗</span>
+      </a>
+    </header>
+
+    <main id="main">
+      <section class="section page-first section-paper" id="sources">
+        <div class="section-heading reveal"><span class="section-number">14</span><div>
+          <p class="kicker">Grounding and reading list</p><h2>Primary sources, with a claim boundary.</h2>
+          <p class="section-intro">Links beside claims are the primary grounding. Versioned papers are snapshots, not necessarily peer-reviewed results. The Sqwish post is an engineering report; framework documentation and dataset cards can change.</p>
+        </div></div>
+        <div class="source-list reveal">
+          <a href="https://arxiv.org/html/2608.27911v2" target="_blank" rel="noreferrer"><span>2026</span><strong>TACIT-Switch · v2</strong><small>Adaptive permanent handoff; censored timing supervision</small><i aria-hidden="true">↗</i></a>
+          <a href="https://arxiv.org/html/2604.23530v1" target="_blank" rel="noreferrer"><span>2026</span><strong>MTRouter · v1</strong><small>Per-turn routing with terminal-outcome targets</small><i aria-hidden="true">↗</i></a>
+          <a href="https://arxiv.org/html/2607.00053v1" target="_blank" rel="noreferrer"><span>2026</span><strong>SWE-Router · v1</strong><small>Fixed-prefix Cheap continuation or Strong restart</small><i aria-hidden="true">↗</i></a>
+          <a href="https://arxiv.org/html/2605.18859v4" target="_blank" rel="noreferrer"><span>2026</span><strong>TwinRouterBench · v4</strong><small>Branch validation and static/live routing evaluation</small><i aria-hidden="true">↗</i></a>
+          <a href="https://arxiv.org/html/2608.24087v1" target="_blank" rel="noreferrer"><span>2026</span><strong>Bayesian Self-Escalation · v1</strong><small>Stopping within generation and textual transfer</small><i aria-hidden="true">↗</i></a>
+          <a href="https://arxiv.org/abs/2508.12631v2" target="_blank" rel="noreferrer"><span>2025</span><strong>Avengers-Pro · v2</strong><small>Embedding/cluster performance–efficiency router</small><i aria-hidden="true">↗</i></a>
+          <a href="https://github.com/ZhangYiqun018/AvengersPro" target="_blank" rel="noreferrer"><span>Code</span><strong>Avengers-Pro implementation</strong><small>Reproduction baseline; pin the revision</small><i aria-hidden="true">↗</i></a>
+          <a href="https://arxiv.org/abs/2603.04444" target="_blank" rel="noreferrer"><span>2026</span><strong>vLLM Semantic Router paper</strong><small>Signal-driven routing framework</small><i aria-hidden="true">↗</i></a>
+          <a href="https://github.com/vllm-project/semantic-router/blob/main/website/docs/overview/semantic-router-overview.md" target="_blank" rel="noreferrer"><span>Docs</span><strong>vLLM Semantic Router architecture</strong><small>Framework/harness boundary; accessed 10 Oct 2026</small><i aria-hidden="true">↗</i></a>
+          <a href="https://arxiv.org/abs/2604.07036" target="_blank" rel="noreferrer"><span>2026</span><strong>ReDAct</strong><small>Uncertainty-based local agent deferral</small><i aria-hidden="true">↗</i></a>
+          <a href="https://proceedings.iclr.cc/paper_files/paper/2026/hash/06b33e277e6c48f361621717c49cde22-Abstract-Conference.html" target="_blank" rel="noreferrer"><span>2026</span><strong>TRIM · ICLR</strong><small>Step-level reasoning model allocation</small><i aria-hidden="true">↗</i></a>
+          <a href="https://arxiv.org/html/2601.02695v1" target="_blank" rel="noreferrer"><span>2026</span><strong>EvoRoute · v1</strong><small>Experience-based sequential model routing</small><i aria-hidden="true">↗</i></a>
+          <a href="https://arxiv.org/abs/2608.25277" target="_blank" rel="noreferrer"><span>2026</span><strong>Routed Graph Handoff</strong><small>Structured versus natural-language handoff formats</small><i aria-hidden="true">↗</i></a>
+          <a href="https://arxiv.org/abs/2603.17280v2" target="_blank" rel="noreferrer"><span>2026</span><strong>FleetOpt · v2</strong><small>Effective-context-window pools; analytical simulation</small><i aria-hidden="true">↗</i></a>
+          <a href="https://arxiv.org/abs/2406.18665" target="_blank" rel="noreferrer"><span>2024</span><strong>RouteLLM</strong><small>Strong/weak query routing</small><i aria-hidden="true">↗</i></a>
+          <a href="https://arxiv.org/abs/2508.21141" target="_blank" rel="noreferrer"><span>2025</span><strong>PILOT</strong><small>Budget-aware contextual-bandit routing</small><i aria-hidden="true">↗</i></a>
+          <a href="https://arxiv.org/abs/2601.07206" target="_blank" rel="noreferrer"><span>2026</span><strong>LLMRouterBench</strong><small>Offline request-level router benchmark</small><i aria-hidden="true">↗</i></a>
+          <a href="https://arxiv.org/abs/2310.12963" target="_blank" rel="noreferrer"><span>2023</span><strong>AutoMix</strong><small>Self-verification and POMDP cascading</small><i aria-hidden="true">↗</i></a>
+          <a href="https://arxiv.org/abs/2506.09033" target="_blank" rel="noreferrer"><span>2025</span><strong>Router-R1</strong><small>Sequential reasoning and routing</small><i aria-hidden="true">↗</i></a>
+          <a href="https://arxiv.org/abs/2608.15817" target="_blank" rel="noreferrer"><span>2026</span><strong>RLCascadeRouter</strong><small>RL model cascading</small><i aria-hidden="true">↗</i></a>
+          <a href="https://proceedings.neurips.cc/paper_files/paper/2024/hash/a6deba3b2408af45b3f9994c2152b862-Abstract-Conference.html" target="_blank" rel="noreferrer"><span>2024</span><strong>TREACLE · NeurIPS</strong><small>Cost-aware sequential model use</small><i aria-hidden="true">↗</i></a>
+          <a href="https://ojs.aaai.org/index.php/AAAI/article/view/11831" target="_blank" rel="noreferrer"><span>2018</span><strong>When Waiting Is Not an Option</strong><small>Learning options with deliberation cost</small><i aria-hidden="true">↗</i></a>
+          <a href="https://proceedings.mlr.press/v306/lefebvre26a.html" target="_blank" rel="noreferrer"><span>2026</span><strong>The Cost of Commitment</strong><small>Option duration, model error, and deliberation cost</small><i aria-hidden="true">↗</i></a>
+          <a href="https://arxiv.org/abs/2307.03172" target="_blank" rel="noreferrer"><span>2023</span><strong>Lost in the Middle</strong><small>Context-position sensitivity in the evaluated models</small><i aria-hidden="true">↗</i></a>
+          <a href="https://arxiv.org/abs/2603.20895v3" target="_blank" rel="noreferrer"><span>2026</span><strong>LLM Router · v3</strong><small>Prefill representations; background, not our method</small><i aria-hidden="true">↗</i></a>
+          <a href="https://sqwish.ai/blog/how-we-accidentally-trained-the-1-model-router" target="_blank" rel="noreferrer"><span>Blog</span><strong>Sqwish engineering report</strong><small>Model–budget outcome prediction; not a peer-reviewed claim</small><i aria-hidden="true">↗</i></a>
+        </div>
+        <p class="reviewed">Research framing reviewed 10 October 2026. Closest-method comparisons use the linked versions and cited sections. Dataset cards are linked in the data section. Protocol, model endpoints, sample size, margins, and budget are proposed decisions to preregister after a feasibility pilot—not completed experiments.</p>
+      </section>
+    </main>
+    <nav class="pager" aria-label="Page navigation"><a class="pager-prev" href="evaluation.html"><small>← Previous</small><strong>Evaluation and contributions</strong></a><span></span></nav>
+
+    <footer>
+      <div><span class="brand-mark" aria-hidden="true">CR</span><div><strong>CheckpointRouter</strong><p>Selective routing for single-agent long-horizon sessions.</p></div></div>
+      <div class="footer-links"><a href="#main">Back to top ↑</a><a href="https://github.com/cs24mtech15016-oss/ai-gateway-ops" target="_blank" rel="noreferrer">Repository ↗</a></div>
+    </footer>
+  </body>
+</html>
