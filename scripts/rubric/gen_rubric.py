@@ -12,7 +12,7 @@ md = open(f"{root}/RUBRIC.md").read().splitlines()
 hdr_i = next(i for i, l in enumerate(md) if l.startswith("| # | Criterion"))
 codes = [c.strip() for c in md[hdr_i].split("|")[3:-1]]
 NAMES = {"RL": "RouteLLM", "AvP": "Avengers-Pro", "FG": "FrugalGPT", "LLM": "LiteLLM", "SAAR": "vLLM SR",
-         "SWE": "SWE-Router", "TAC": "TACIT", "ReD": "ReDAct", "MTR": "MTRouter", "SEQ": "SeqRoute",
+         "ReD": "ReDAct", "MTR": "MTRouter", "SEQ": "SeqRoute",
          "ARES": "Ares", "TAB": "Turn budgets", "ACON": "ACON", "TRC": "TRACE", "PAIR": "PAIR",
          "HT": "Handoff Tax", "TWN": "TwinRouter-Bench", "CPR": "CPR (ours)"}
 FAMOUS = {"RL", "AvP", "FG", "LLM"}

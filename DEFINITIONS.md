@@ -84,12 +84,12 @@ data and caps. Only *when* the decision can fire differs.
 | Timing policy | Decision points | Prior work |
 |---|---|---|
 | **Request-level** | `t = 0` only | RouteLLM, AvP |
-| **Fixed-prefix(K)** | One decision after `K` calls. `K` is chosen on dev, as a percentile of the starting model's step distribution per difficulty bucket (HT §3.2) | SWE-Router, HT |
+| **Fixed-prefix(K)** | One decision after `K` calls. `K` is chosen on dev, as a percentile of the starting model's step distribution per difficulty bucket (HT §3.2) | HT |
 | **Per-call** | Every unlocked boundary, with `hold` allowed | MTRouter, TwinRouterBench |
-| **Adaptive checkpoint** | Boundaries where a trigger fires and `gate = revise` | TACIT (one-way), CPR |
+| **Adaptive checkpoint** | Boundaries where a trigger fires and `gate = revise` | CPR |
 
-- **One-way vs reversible:** a one-way policy makes at most one switch, to the stronger model (TACIT,
-  SWE-Router). A reversible policy may switch again, including back to a cheaper model (rubric A5).
+- **One-way vs reversible:** a one-way policy makes at most one switch, to the stronger model. A
+  reversible policy may switch again, including back to a cheaper model (rubric A5).
   CPR Phase 1 is one-way; Phase 3 is reversible.
 - **Composed policy:** independently tuned timing, model and packet selectors run together. This
   is the baseline the joint policy must beat (rubric D4).

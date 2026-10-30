@@ -20,7 +20,7 @@ judged by terminal episode success, total cost, and latency. Experiments are sco
    simple composed policies; add a small reasoning-budget menu only if justified.
 
 Recovery is a tractable first measurement, not the identity of the whole proposal. The site
-retains grounding in Avengers-Pro, vLLM Semantic Router, TACIT-Switch, MTRouter, SWE-Router,
+retains grounding in Avengers-Pro, vLLM Semantic Router, MTRouter,
 TwinRouterBench, ProgRouter, MasRouter, and other prior art. Novelty remains provisional;
 existing adaptive handoff, terminal-outcome learning, and joint orchestration are acknowledged.
 

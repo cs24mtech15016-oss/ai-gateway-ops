@@ -62,29 +62,14 @@
           <article class="literature-family reveal" aria-labelledby="literature-timing">
             <header class="literature-heading"><div><p class="kicker">B · Sequential model control</p><h3 id="literature-timing">When should execution stay, defer, or switch?</h3></div><span class="phase-tag">Phase 1 · evidence + timing</span></header>
             <div class="literature-entry">
-              <div class="literature-work"><h4><a href="https://arxiv.org/html/2608.27911v2#S2" target="_blank" rel="noreferrer">TACIT-Switch</a></h4><small>Adaptive handoff · §§2–3, 5–6 · v2</small></div>
-              <p><b class="literature-label">Established contribution</b>Adaptive permanent handoff: paired full Cheap/Strong rollouts and teacher-annotated timing intervals train a cumulative-risk threshold model. ALFWorld and DABench; a parameter-weighted call-cost proxy.</p>
-              <p><b class="literature-label">Role in our study</b>Adaptive timing already exists. Compare measured checkpoint-continuation supervision with initial Strong-success/teacher-timing supervision, disclosing annotation and deployment costs.</p>
-            </div>
-            <div class="literature-entry">
               <div class="literature-work"><h4><a href="https://arxiv.org/html/2604.23530v1#S3" target="_blank" rel="noreferrer">MTRouter</a></h4><small>Per-turn routing · §3.3 · v1</small></div>
               <p><b class="literature-label">Established contribution</b>History and candidate-model representations drive turn-level routing; terminal outcomes and future-error penalties provide supervision. ScienceWorld and HLE evaluation.</p>
               <p><b class="literature-label">Role in our study</b>Terminal supervision is not our novelty. Compare checkpoint and per-call timing with matched state/outcome predictors and a stay action; only then isolate later context choices.</p>
             </div>
             <div class="literature-entry">
-              <div class="literature-work"><h4><a href="https://arxiv.org/html/2607.00053v1#S4" target="_blank" rel="noreferrer">SWE-Router</a></h4><small>Software-agent routing · §4, Algorithm 1 · v1</small></div>
-              <p><b class="literature-label">Established contribution</b>A fixed Cheap exploration prefix precedes a choice to continue Cheap or restart Strong from the original software task.</p>
-              <p><b class="literature-label">Role in our study</b>Use a direct fixed-prefix baseline. Separate restart from in-place continuation and adaptive timing, keeping residual-budget accounting identical.</p>
-            </div>
-            <div class="literature-entry">
-              <div class="literature-work"><h4><a href="https://arxiv.org/html/2608.24087v1#S6" target="_blank" rel="noreferrer">Bayesian Self-Escalation</a></h4><small>Optimal stopping · §§6, 8, 10 · v1</small></div>
-              <p><b class="literature-label">Established contribution</b>Stopping within generation, textual context distillation, and senior re-reading costs. The reported model experiment uses a constant-threshold policy on MBPP.</p>
-              <p><b class="literature-label">Role in our study</b>Stopping and textual transfer are established. Test persistent tool/workspace continuations and, in later phases, bounded context allocation without requiring token-level logits.</p>
-            </div>
-            <div class="literature-entry">
               <div class="literature-work"><h4><a href="https://arxiv.org/abs/2604.07036" target="_blank" rel="noreferrer">ReDAct</a> · <a href="https://proceedings.iclr.cc/paper_files/paper/2026/hash/06b33e277e6c48f361621717c49cde22-Abstract-Conference.html" target="_blank" rel="noreferrer">TRIM</a></h4><small>Local deferral / reasoning-step control</small></div>
               <p><b class="literature-label">Established contribution</b>ReDAct defers uncertain local decisions in ALFWorld/MiniGrid. TRIM uses reasoning-step correctness and uncertainty to allocate stronger-model effort.</p>
-              <p><b class="literature-label">Role in our study</b>Compare local risk/uncertainty intervention with remaining-episode value. Distinguish temporary deferral followed by Cheap from permanent handoff; disclose faithful reproductions versus logit-free analogues.</p>
+              <p><b class="literature-label">Role in our study</b>Compare local risk/uncertainty intervention with remaining-episode value. Distinguish temporary deferral followed by Cheap from reversible model switching; disclose faithful reproductions versus logit-free analogues.</p>
             </div>
             <div class="literature-entry">
               <div class="literature-work"><h4><a href="https://arxiv.org/html/2601.02695v1" target="_blank" rel="noreferrer">EvoRoute</a></h4><small>Feedback-driven workflow routing · v1</small></div>

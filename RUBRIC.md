@@ -24,8 +24,6 @@ partly model-assisted; quote the paper section or file, not this table, when cit
 | FG | FrugalGPT | single-query cascade | arXiv 2305.05176 |
 | LLM | LiteLLM complexity router (this repo today) | single-turn heuristic | `litellm/config.yaml` |
 | SAAR | vLLM Session-Aware Agentic Routing | session router | vllm.ai blog 2026-06-02; vllm-project/semantic-router |
-| SWE | SWE-Router | explore-then-escalate (restart) | arXiv 2607.00053 |
-| TAC | TACIT-Switch | adaptive permanent handoff | arXiv 2608.27911 |
 | ReD | ReDAct | uncertainty deferral | arXiv 2604.07036 |
 | MTR | MTRouter | per-turn, outcome-supervised | arXiv 2604.23530 |
 | SEQ | SeqRoute | budget-aware sequential (offline RL) | arXiv 2605.25424 |
@@ -39,6 +37,12 @@ partly model-assisted; quote the paper section or file, not this table, when cit
 | CPR | CheckpointRouter (ours) | checkpoint model/context allocation, single agent | this repo |
 
 Dropped for v1 (multi-agent only): ProgRouter, MasRouter, CASTER.
+
+Dropped as not close matches (one-way escalation only; they never return to the cheap model):
+TACIT-Switch (arXiv 2608.27911, permanent handoff, §2.1 and Algorithm 1), SWE-Router
+(arXiv 2607.00053, one continue-or-restart decision, Algorithm 1) and Bayesian Self-Escalation
+(arXiv 2608.24087, "escalation is terminal", §3). They are still cited as prior art: TACIT ran a
+matched fixed/per-step/adaptive timing comparison for one-way handoff (Table 2, Fig. 2b).
 
 ## Code availability (checked 2026-10-26)
 
@@ -57,40 +61,40 @@ searches turned up nothing; it does not prove no code exists.
 | ACON | github.com/microsoft/acon (`d63f9ae`) | C1, D3, E1, E3 |
 | TRC | github.com/nokia-applied-research/Trace (`9be7d66`) | C1, E2, E3 |
 | TWN | github.com/CommonstackAI/TwinRouterBench (`466fb0b`) | A5, B1, B2, D2, D3, E2, E3, E4 |
-| SWE, TAC, ReD, SEQ, ARES, TAB, PAIR, HT | Not found | None; paper only |
+| ReD, SEQ, ARES, TAB, PAIR, HT | Not found | None; paper only |
 
-**Consequence for CPR:** the cells that matter most for the novelty claim, TACIT's A4 and HT's D3/D4,
-come from papers with no public code, so they cannot be reproduced yet.
+**Consequence for CPR:** the cells that matter most for the novelty claim, HT's A4, D3 and D4,
+come from a paper with no public code, so they cannot be reproduced yet.
 
 ## Matrix
 
-| # | Criterion | RL | AvP | FG | LLM | SAAR | SWE | TAC | ReD | MTR | SEQ | ARES | TAB | ACON | TRC | PAIR | HT | TWN | CPR |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| **A** | **When the router decides** | | | | | | | | | | | | | | | | | | |
-| A1 | Decides beyond the first prompt | · | · | · | · | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | – | – | – | – | ✅ | ☐ |
-| A2 | Uses partial-trajectory execution evidence (tests, errors, progress) | · | · | · | · | ◐ | ✅ | ✅ | ◐ | ✅ | · | ◐ | ◐ | – | – | – | – | ◐ | ☐ |
-| A3 | Explicit stay/switch checkpoints | · | · | · | · | ◐ | ✅ | ✅ | ◐ | · | · | · | · | – | – | – | – | · | ☐ |
-| A4 | Compares fixed vs. per-call vs. adaptive timing on matched tasks | · | · | · | · | · | ◐ | ✅ | · | · | · | · | · | – | – | – | ◐ | · | ☐ |
-| A5 | Reversible switching (can return to the cheap model) | · | · | · | · | ✅ | · | · | ✅ | ✅ | ✅ | ✅ | – | – | – | – | – | ✅ | ☐ (Phase 3) |
-| **B** | **Continuity and cost of switching** | | | | | | | | | | | | | | | | | | |
-| B1 | Tool-loop / provider-state hard locks | · | · | · | · | ✅ | · | · | · | · | · | – | – | – | – | – | – | · | ☐ |
-| B2 | Cache-aware switch cost | · | · | · | · | ✅ | · | · | · | · | · | – | – | – | – | – | ◐ | ◐ | ☐ |
-| B3 | Idle / task-drift reset points | · | · | · | · | ✅ | · | · | · | · | · | – | – | – | – | – | – | · | ☐ |
-| B4 | Charges handoff overhead (re-reading context, lost state) in the objective | · | · | · | · | ✅ | ◐ | ◐ | ◐ | · | · | – | – | – | – | – | ◐ | · | ☐ |
-| **C** | **Objective** | | | | | | | | | | | | | | | | | | |
-| C1 | Episode success is the objective or the training label | · | · | · | · | · | ✅ | ✅ | ◐ | ✅ | ◐ | ◐ | ✅ | ✅ | ◐ | ✅ | ✅ | ✅ | ☐ |
-| C2 | Remaining session budget is part of the router's state | · | · | · | · | · | · | ◐ | · | · | ✅ | · | · | – | – | – | – | · | ☐ |
-| C3 | Latency / wall time in the objective | · | · | · | · | ◐ | · | · | · | · | · | · | · | – | – | – | · | · | ☐ |
-| **D** | **What gets allocated** | | | | | | | | | | | | | | | | | | |
-| D1 | Model choice | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | · | · | · | · | · | ◐ | ✅ | ☐ |
-| D2 | Reasoning effort / thinking budget | · | · | · | · | ◐ | · | · | · | · | · | ✅ | ✅ | · | · | · | · | · | ☐ (optional) |
-| D3 | Context packet (full / compact / drop / restart) as a decision | · | · | · | · | · | ◐ | · | · | · | · | · | · | ◐ | ◐ | ◐ | ◐ | · | ☐ |
-| D4 | Model and context chosen jointly | · | · | · | · | · | · | · | · | · | · | · | · | · | · | · | ◐ | · | ☐ |
-| **E** | **Evaluation** | | | | | | | | | | | | | | | | | | |
-| E1 | Real long-horizon agent benchmark | · | · | · | · | ◐ | ✅ | ◐ | ◐ | ◐ | · | ✅ | ✅ | ✅ | ✅ | ? | ✅ | ✅ | ☐ |
-| E2 | Measures continuation value from the same mid-run state | · | · | · | · | · | · | · | · | · | ◐ | ◐ | · | · | ✅ | ✅ | ? | ◐ | ☐ |
-| E3 | Run-to-run reliability (seeds, pass^k, CIs) | · | · | · | · | ◐ | · | ✅ | ◐ | ◐ | · | · | · | · | ✅ | ✅ | ◐ | · | ☐ |
-| E4 | Oracle / upper-bound reported | · | · | · | · | · | · | ◐ | · | · | · | · | · | · | · | · | · | ◐ | ☐ (sampled-branch only) |
+| # | Criterion | RL | AvP | FG | LLM | SAAR | ReD | MTR | SEQ | ARES | TAB | ACON | TRC | PAIR | HT | TWN | CPR |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| **A** | **When the router decides** | | | | | | | | | | | | | | | | |
+| A1 | Decides beyond the first prompt | · | · | · | · | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | – | – | – | – | ✅ | ☐ |
+| A2 | Uses partial-trajectory execution evidence (tests, errors, progress) | · | · | · | · | ◐ | ◐ | ✅ | · | ◐ | ◐ | – | – | – | – | ◐ | ☐ |
+| A3 | Explicit stay/switch checkpoints | · | · | · | · | ◐ | ◐ | · | · | · | · | – | – | – | – | · | ☐ |
+| A4 | Compares fixed vs. per-call vs. adaptive timing on matched tasks | · | · | · | · | · | · | · | · | · | · | – | – | – | ◐ | · | ☐ |
+| A5 | Reversible switching (can return to the cheap model) | · | · | · | · | ✅ | ✅ | ✅ | ✅ | ✅ | – | – | – | – | – | ✅ | ☐ (Phase 3) |
+| **B** | **Continuity and cost of switching** | | | | | | | | | | | | | | | | |
+| B1 | Tool-loop / provider-state hard locks | · | · | · | · | ✅ | · | · | · | – | – | – | – | – | – | · | ☐ |
+| B2 | Cache-aware switch cost | · | · | · | · | ✅ | · | · | · | – | – | – | – | – | ◐ | ◐ | ☐ |
+| B3 | Idle / task-drift reset points | · | · | · | · | ✅ | · | · | · | – | – | – | – | – | – | · | ☐ |
+| B4 | Charges handoff overhead (re-reading context, lost state) in the objective | · | · | · | · | ✅ | ◐ | · | · | – | – | – | – | – | ◐ | · | ☐ |
+| **C** | **Objective** | | | | | | | | | | | | | | | | |
+| C1 | Episode success is the objective or the training label | · | · | · | · | · | ◐ | ✅ | ◐ | ◐ | ✅ | ✅ | ◐ | ✅ | ✅ | ✅ | ☐ |
+| C2 | Remaining session budget is part of the router's state | · | · | · | · | · | · | · | ✅ | · | · | – | – | – | – | · | ☐ |
+| C3 | Latency / wall time in the objective | · | · | · | · | ◐ | · | · | · | · | · | – | – | – | · | · | ☐ |
+| **D** | **What gets allocated** | | | | | | | | | | | | | | | | |
+| D1 | Model choice | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | · | · | · | · | · | ◐ | ✅ | ☐ |
+| D2 | Reasoning effort / thinking budget | · | · | · | · | ◐ | · | · | · | ✅ | ✅ | · | · | · | · | · | ☐ (optional) |
+| D3 | Context packet (full / compact / drop / restart) as a decision | · | · | · | · | · | · | · | · | · | · | ◐ | ◐ | ◐ | ◐ | · | ☐ |
+| D4 | Model and context chosen jointly | · | · | · | · | · | · | · | · | · | · | · | · | · | ◐ | · | ☐ |
+| **E** | **Evaluation** | | | | | | | | | | | | | | | | |
+| E1 | Real long-horizon agent benchmark | · | · | · | · | ◐ | ◐ | ◐ | · | ✅ | ✅ | ✅ | ✅ | ? | ✅ | ✅ | ☐ |
+| E2 | Measures continuation value from the same mid-run state | · | · | · | · | · | · | · | ◐ | ◐ | · | · | ✅ | ✅ | ? | ◐ | ☐ |
+| E3 | Run-to-run reliability (seeds, pass^k, CIs) | · | · | · | · | ◐ | ◐ | ◐ | · | · | · | · | ✅ | ✅ | ◐ | · | ☐ |
+| E4 | Oracle / upper-bound reported | · | · | · | · | · | · | · | · | · | · | · | · | · | · | ◐ | ☐ (sampled-branch only) |
 
 Notes on contested cells:
 - **HT is a measurement study, not a router.** It switches at seven fixed switch points (percentiles
@@ -102,16 +106,11 @@ Notes on contested cells:
   model should continue" and for routers that "treat the handoff interface as part of the switching
   policy". **E2 `?`:** not yet confirmed whether the four interfaces branch from one shared prefix
   run or from independent prefix runs.
-- **A4:** TACIT-Switch compares Task Router (pre-execution), Step Deferral (per-step), a
-  development-tuned fixed-prefix SWE-Router analogue and its adaptive handoff, at matched cost, in a
-  100-replicate simulation and on ALFWorld/DABench (Table 2, Fig. 2b). That is the A4 comparison,
-  with limits: one-way handoff only, no software-engineering benchmark, parameter-count cost proxy,
-  no context choice. SWE-Router sweeps only the prefix length K = 0..4; HT only fixed switch points.
+- **A4:** no remaining method compares fixed, per-call and adaptive timing on matched tasks. HT
+  compares only fixed switch points (`◐`).
 - **E2:** TRACE and PAIR run paired continuations from the same restored agent state, but only to
-  judge compaction. TACIT explicitly *avoids* checkpoint-level counterfactual rollouts (one full
-  rollout per model). SWE-Router replays one logged run per model. TwinRouterBench's static labels
+  judge compaction. TwinRouterBench's static labels
   replay prefixes with mixed tiers (`◐`). SeqRoute branches simulated chat turns, not agent state.
-- **A3 for SWE-Router:** one fixed decision point after K cheap turns; it is explicit, so `✅`.
 - **A5 for ReDAct:** control returns to the small model after each deferred step; the deferred
   action is not undone.
 - **B2 for TwinRouterBench:** four-bucket cost (fresh input, cache read, cache write, output;
@@ -129,8 +128,7 @@ Notes on contested cells:
 - **ACON C1:** the guideline optimiser is driven by baseline-success / compressed-failure flips
   (`unified_update_history_prompt.py:183-214`), i.e. task success as the signal. Its compression
   trigger is a fixed token threshold (4096 history / 256 observation), hence D3 `◐`.
-- **B4 for SWE-Router / ReDAct:** the wasted cheap prefix (SWE) or discarded small-model call (ReD)
-  is paid, but re-reading and lost cache are not charged.
+- **B4 for ReDAct:** the discarded small-model call is paid, but re-reading and lost cache are not charged.
 - **B4 for SAAR:** the handoff penalty is an EMA of the cost difference between consecutive records
   where the model changed (`lookuptable/builder.go:218-247, 342-346`), default 0.05. It is a
   per-switch cost, not a measured quality or continuation outcome.
@@ -139,14 +137,12 @@ Notes on contested cells:
 - **C1 for TRACE:** preference pairs come from a boundary-local burden score; terminal outcomes are
   used only to select templates on dev.
 - **C2 for TAB:** the state is history plus the current sub-question, with no remaining-budget
-  feature. **TACIT `◐`:** remaining tool-budget pressure appears as a DABench risk feature.
+  feature.
 - **C3:** TAB and AvP measure or mention latency but do not optimise it. SAAR feeds a
   `latency_aware` base selector into the session score.
 - **D2 for SAAR:** `reasoning_effort` is static per decision and model ref
   (`extproc/req_filter_reason_selection.go:70-87`, applied at `fallback_dispatch.go:653-657`). The
   switch gate reads it as quality evidence (`session_switch_gate.go:169`) but never chooses it.
-- **D3 for SWE-Router:** escalation gives the strong model only the original query; the packet is
-  fixed by the model choice, not decided.
 - **E1 for SeqRoute:** a simulated four-turn ShareGPT chat with no tools.
 - **E1 / E3 for SAAR:** the blog's headline numbers come from a pure Python simulation with no
   HTTP calls (`bench/agentic_routing_experiment.py:11-21`), run over multiple seeds (`--seeds`,
@@ -158,26 +154,25 @@ Notes on contested cells:
   random baselines (an any-model-correct Oracle row exists in LLMRouterBench's aggregator, not in
   AvP itself). TwinRouterBench's code has a `GoldTierRouter` "oracle" that replays the published
   per-step gold labels, saturates at the last label on longer runs, and is not available on the
-  dynamic SWE track (`routers/gold_tier.py`; README). TACIT reports an oracle-timing handoff only
-  in simulation.
+  dynamic SWE track (`routers/gold_tier.py`; README).
 - **E2 for TwinRouterBench:** labels come from sequential locking: earlier steps keep their exact
   responses and state, one step tries a candidate tier, and all later steps are forced to `high`
   (`docs/DATA_GENERATION.md:90-106`). Only one step varies per label.
 
 ## Where CPR is novel (v1), after the 2026-10-26 re-check
 
-No prior method has a `✅` in **D3, D4, C3 or E4**. A4 and E2 each have a `✅`, but only in a
-different setting. Ranked:
+No method in the matrix has a `✅` in **A4, D3, D4, C3 or E4**. E2 has a `✅`, but only for
+compaction. A4 was done for one-way handoff by TACIT (dropped above), so it is not claimed as new. Ranked:
 
 | Claim | Prior state | What CPR adds | Strength | Main risk |
 |---|---|---|---|---|
 | **D3 + D4 as a learned decision:** choose the receiving model *and* the handoff packet per checkpoint state | HT measured that the best interface depends on direction (drop helps escalation, hurts downshift) but used fixed policies | A policy that picks (model, packet) from checkpoint evidence, compared with the best fixed packet and with independently tuned selectors | Strongest | HT already supplies the motivation; reviewers will ask for gains over HT's best fixed interface |
-| **E2 for model switching:** label stay/switch decisions with continuations branched from the same saved agent state | TRACE and PAIR do this for compaction only; TACIT and SWE-Router avoid it | Branch labels for model × packet actions | Moderate | It is an adoption of TRACE/PAIR's method; the novelty lies in what is decided, not in how it is measured |
-| **A4 in software agents with reversible, in-place continuation and real dollars** | TACIT has the comparison for one-way handoff, outside software engineering, with proxy cost | The same matched comparison with packets and switch-back | Weak (an empirical extension) | Not a novelty claim; frame it as a replication and extension of TACIT |
+| **E2 for model switching:** label stay/switch decisions with continuations branched from the same saved agent state | TRACE and PAIR do this for compaction only | Branch labels for model × packet actions | Moderate | It is an adoption of TRACE/PAIR's method; the novelty lies in what is decided, not in how it is measured |
+| **A4** fixed vs. per-call vs. adaptive timing on matched tasks, with reversible switching | HT compares fixed switch points only; TACIT (dropped, one-way) ran it for permanent handoff | The matched timing comparison with packets and switch-back | Weak (an empirical extension) | Not a novelty claim; frame it as extending TACIT's comparison to reversible switching |
 | **C3** latency in the objective | Nobody optimises it | Latency budget B_L in the constrained objective | Minor | Easy to add, low reviewer weight |
 
-**Not novel; adopt and cite:** decisions beyond the first prompt (MTR, SWE, ReD); episode-success
-supervision (MTR, TWN, HT); timing-policy comparison (TAC); budget in the router state (SEQ);
+**Not novel; adopt and cite:** decisions beyond the first prompt (MTR, ReD, SAAR); episode-success
+supervision (MTR, TWN, HT); budget in the router state (SEQ);
 per-step effort (ARES, TAB); continuity locks, cache cost, reset points and handoff penalty (SAAR);
 cache-aware cost accounting (TWN, HT); handoff interfaces and their measured tax (HT); paired
 continuations from a restored state (TRC, PAIR); optimised compaction (ACON, PAIR).
@@ -205,13 +200,13 @@ and beat HT's best fixed interface at matched cost.
 
 - [ ] B1 Session ID plus tool-loop / provider-state locks in the gateway (reuse or mirror vSR)
 - [ ] E4 Baselines: always-strong, always-cheap, sticky, LiteLLM complexity router, SAAR/vSR,
-      **HT best fixed interface per direction**, TACIT-style adaptive handoff, oracle
+      **HT best fixed interface per direction**, oracle
 - [ ] B2 / B4 Four-bucket cache-aware cost (fresh, cache read, cache write, output), matching HT/TWN
 - [ ] A3 Checkpoint hook in the Terminal-Bench runner (stay / switch) at quiescent boundaries only
 - [ ] E2 Paired continuations from saved checkpoint state, with a replay-equivalence check
 - [ ] D3 Packet menu FULL / STRUCT / DROP / RESTART (DROP added because HT found it best for escalation)
 - [ ] D4 Joint model × packet selector vs. best fixed packet vs. independently tuned selectors
-- [ ] A4 Fixed-prefix vs. per-call vs. adaptive timing, matched (replicating TACIT in SWE)
+- [ ] A4 Fixed-prefix vs. per-call vs. adaptive timing, matched
 - [ ] E3 Multiple seeds, pass^k, task-clustered CIs
 - [ ] D2 Small effort menu (only if the earlier results justify it)
 
