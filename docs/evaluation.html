@@ -98,7 +98,7 @@
         </table></div>
 
         <div class="sub-heading reveal"><p class="kicker">Test 3 · closed loop</p><h3>Same harness, same menu, only the policy changes.</h3>
-          <p>Each policy plugs into the same <code>decide()</code> call (Fig. 1). It sees the same features, model pool and packet menu, with the same caps and the same training data where it learns. A comparison that changes anything else is not reported as a policy comparison.</p></div>
+          <p>Each policy plugs into the same <code>decide()</code> call inside the gateway (Fig. 1); switching policy is a gateway config change, and the agent is the same. It sees the same features, model pool and packet menu, with the same caps and the same training data where it learns. A comparison that changes anything else is not reported as a policy comparison.</p></div>
         <div class="table-wrap reveal"><table class="research-table is-compact">
           <thead><tr><th scope="col">Baseline</th><th scope="col">When it decides</th><th scope="col">What it chooses</th><th scope="col">What beating it shows</th></tr></thead>
           <tbody>
@@ -326,8 +326,8 @@
         </div>
         <div class="sub-heading reveal"><p class="kicker">Build order</p><h3>Seven milestones, each with a gate.</h3><p>No milestone starts until the one before it passes. A failed gate is reported as a finding and stops or reshapes the project.</p></div>
         <ol class="gate-list reveal">
-          <li><span class="gate-id">M0</span><div><h4>Instrumentation</h4><p>Gateway plugin: session binding, tool-loop and provider-state locks, four-bucket usage logging, worst-case cost reservation.</p></div><div class="gate-exit"><b>Gate</b>Logged per-call cost matches the provider's billed usage on a sample of calls.</div></li>
-          <li><span class="gate-id">M1</span><div><h4>Checkpoints and snapshots</h4><p>Checkpoint hook and triggers in the harness; snapshot service with the replay-equivalence check.</p></div><div class="gate-exit"><b>Gate</b>A declared share of pilot snapshots (for example ≥ 95%) pass replay; failures are understood.</div></li>
+          <li><span class="gate-id">M0</span><div><h4>Instrumentation</h4><p>Gateway plugin: session binding, tool-loop and provider-state locks, four-bucket usage logging, worst-case cost reservation, packet rewrite and persistence.</p></div><div class="gate-exit"><b>Gate</b>Logged per-call cost matches the provider's billed usage on a sample of calls.</div></li>
+          <li><span class="gate-id">M1</span><div><h4>Checkpoints and snapshots</h4><p>Trigger detection and <code>decide()</code> in the gateway plugin; harness adapter with restart and snapshot callbacks; snapshot service with the replay-equivalence check.</p></div><div class="gate-exit"><b>Gate</b>A declared share of pilot snapshots (for example ≥ 95%) pass replay; failures are understood.</div></li>
           <li><span class="gate-id">M2</span><div><h4>Phase 1a pilot</h4><p>Branch runner, evaluator and label store. For example 60 tasks × 3 checkpoints × 5 branches × 3 seeds = 2,700 continuations.</p></div><div class="gate-exit"><b>Gate · Test 1</b>Switch advantage varies across checkpoint states beyond trial noise. If one action always wins, ship that rule and stop.</div></li>
           <li><span class="gate-id">M3</span><div><h4>Predictors</h4><p>Feature extractor, calibrated p̂, Ĉ and L̂, gate threshold.</p></div><div class="gate-exit"><b>Gate · Test 2</b>Better calibration and lower regret than task-only features on held-out dev repositories.</div></li>
           <li><span class="gate-id">M4</span><div><h4>Phase 1b · timing (A4)</h4><p>Request-level, fixed-prefix, per-call and adaptive checkpoint timing on the same predictor, closed loop.</p></div><div class="gate-exit"><b>Gate · Test 3</b>The operating point holds on the test split.</div></li>

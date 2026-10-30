@@ -202,7 +202,8 @@ and beat HT's best fixed interface at matched cost.
 - [ ] E4 Baselines: always-strong, always-cheap, sticky, LiteLLM complexity router, SAAR/vSR,
       **HT best fixed interface per direction**, oracle
 - [ ] B2 / B4 Four-bucket cache-aware cost (fresh, cache read, cache write, output), matching HT/TWN
-- [ ] A3 Checkpoint hook in the Terminal-Bench runner (stay / switch) at quiescent boundaries only
+- [ ] A3 Checkpoint decisions in the LiteLLM gateway plugin (stay / switch) at quiescent boundaries only;
+      harness adapter supplies the session header plus restart and snapshot callbacks
 - [ ] E2 Paired continuations from saved checkpoint state, with a replay-equivalence check
 - [ ] D3 Packet menu FULL / STRUCT / DROP / RESTART (DROP added because HT found it best for escalation)
 - [ ] D4 Joint model × packet selector vs. best fixed packet vs. independently tuned selectors

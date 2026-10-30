@@ -115,55 +115,57 @@
       <section class="section section-light" id="system-design">
         <div class="section-heading reveal"><span class="section-number">08</span><div>
           <p class="kicker">System design</p><h2>Three planes, one decision interface.</h2>
-          <p class="section-intro">CheckpointRouter has three parts. The <b>online plane</b> runs one agent episode and makes stay/switch decisions. The <b>offline plane</b> branches saved checkpoints to produce training labels. The <b>evaluation plane</b> runs every policy on held-out tasks. CPR and every baseline sit behind the same <code>decide()</code> call, so comparisons are matched by construction.</p>
+          <p class="section-intro">CheckpointRouter has three parts. The <b>online plane</b> runs one agent episode; every model call passes through the LiteLLM gateway, and <b>the gateway makes every stay/switch decision</b>. The <b>offline plane</b> branches saved checkpoints to produce training labels. The <b>evaluation plane</b> runs every policy on held-out tasks. CPR and every baseline sit behind the same <code>decide()</code> call, so comparisons are matched by construction.</p>
         </div></div>
 
         <figure class="diagram reveal" id="architecture">
           <p class="diagram-title"><span>FIG 1</span>Architecture</p>
           <div class="diagram-scroll">
-          <svg viewBox="0 0 1100 640" role="img" aria-labelledby="f1t f1d">
+          <svg viewBox="0 0 1100 690" role="img" aria-labelledby="f1t f1d">
             <title id="f1t">CheckpointRouter architecture</title>
-            <desc id="f1d">Online plane: the agent harness exchanges tool calls with a Docker task sandbox and sends model calls through the LiteLLM gateway with a CPR plugin, which forwards them to the active Cheap or Strong model and logs usage to a Postgres ledger. At checkpoints the harness asks the CPR controller to decide; the controller reads session state from Redis. Offline plane: prefix runs, snapshots, branch runner, hidden-test evaluator, label store, trainer and policy registry, which deploys a frozen policy to the controller. Evaluation plane: a closed-loop runner, paired statistics and a decision report.</desc>
+            <desc id="f1d">Online plane: the agent harness runs an unchanged agent loop against a Docker sandbox and sends every model call to the LiteLLM gateway with model cpr and a session header. Inside the gateway the CPR plugin binds the session and checks locks, detects triggers in tool output, runs decide(), applies the chosen packet, then routes to the Cheap or Strong model and meters usage into a Postgres ledger. Session state lives in Redis. The gateway calls back to the harness only to restart the sandbox or take a snapshot. Offline plane: prefix runs, snapshots, branch runner, hidden-test evaluator, label store, trainer and policy registry, which deploys a frozen policy into the gateway. Evaluation plane: closed-loop runner, paired statistics and decision report.</desc>
             <defs><marker id="ah1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#111714"/></marker></defs>
 
-            <rect class="d-lane" x="10" y="10" width="1080" height="272" rx="14"/>
-            <text class="d-lane-label" x="28" y="36">ONLINE · ONE AGENT EPISODE</text>
-            <rect class="d-box" x="30" y="60" width="180" height="74" rx="10"/>
-            <text class="d-title" x="120" y="92">Task sandbox</text><text class="d-sub" x="120" y="112">Docker · repo · hidden tests</text>
-            <rect class="d-new" x="270" y="60" width="200" height="74" rx="10"/>
-            <text class="d-title" x="370" y="92">Agent harness</text><text class="d-sub" x="370" y="112">agent loop + checkpoint hook</text>
-            <rect class="d-new" x="540" y="60" width="210" height="74" rx="10"/>
-            <text class="d-title" x="645" y="92">LiteLLM gateway</text><text class="d-sub" x="645" y="112">+ CPR plugin</text>
-            <rect class="d-box" x="830" y="48" width="240" height="44" rx="10"/>
-            <text class="d-title" x="950" y="75">Cheap model</text>
-            <rect class="d-box" x="830" y="104" width="240" height="44" rx="10"/>
-            <text class="d-title" x="950" y="131">Strong model</text>
-            <rect class="d-new" x="270" y="190" width="200" height="74" rx="10"/>
-            <text class="d-title" x="370" y="222">CPR controller</text><text class="d-sub" x="370" y="242">features → menu → Q̂ → gate</text>
-            <rect class="d-box" x="540" y="190" width="210" height="74" rx="10"/>
-            <text class="d-title" x="645" y="222">Session store</text><text class="d-sub" x="645" y="242">Redis: active model, r_t, cache</text>
-            <rect class="d-box" x="830" y="190" width="240" height="74" rx="10"/>
-            <text class="d-title" x="950" y="222">Usage ledger</text><text class="d-sub" x="950" y="242">Postgres: tokens, $, latency per call</text>
+            <rect class="d-lane" x="10" y="10" width="1080" height="320" rx="14"/>
+            <text class="d-lane-label" x="28" y="36">ONLINE · ONE AGENT EPISODE · DECISIONS RUN IN THE GATEWAY</text>
+            <rect class="d-box" x="30" y="150" width="150" height="74" rx="10"/>
+            <text class="d-title" x="105" y="182">Task sandbox</text><text class="d-sub" x="105" y="202">Docker · repo</text>
+            <rect class="d-new" x="230" y="150" width="170" height="74" rx="10"/>
+            <text class="d-title" x="315" y="182">Agent harness</text><text class="d-sub" x="315" y="202">agent loop + thin adapter</text>
 
-            <line class="d-arrow" x1="210" y1="86" x2="268" y2="86" marker-end="url(#ah1)"/>
-            <line class="d-arrow d-return" x1="270" y1="110" x2="212" y2="110" marker-end="url(#ah1)"/>
-            <text class="d-label" x="240" y="78">tool I/O</text>
-            <line class="d-arrow" x1="470" y1="86" x2="538" y2="86" marker-end="url(#ah1)"/>
-            <line class="d-arrow d-return" x1="540" y1="110" x2="472" y2="110" marker-end="url(#ah1)"/>
-            <text class="d-label" x="505" y="78">messages</text>
-            <line class="d-arrow" x1="750" y1="86" x2="828" y2="72" marker-end="url(#ah1)"/>
-            <line class="d-arrow" x1="750" y1="110" x2="828" y2="124" marker-end="url(#ah1)"/>
-            <line class="d-arrow" x1="350" y1="134" x2="350" y2="188" marker-end="url(#ah1)"/>
-            <text class="d-label d-end" x="342" y="166">decide()</text>
-            <line class="d-arrow d-return" x1="390" y1="190" x2="390" y2="136" marker-end="url(#ah1)"/>
-            <text class="d-label d-left" x="398" y="166">hold | (m, κ)</text>
-            <line class="d-arrow" x1="472" y1="227" x2="538" y2="227" marker-start="url(#ah1)" marker-end="url(#ah1)"/>
-            <text class="d-label" x="505" y="219">read</text>
-            <line class="d-arrow" x1="645" y1="136" x2="645" y2="188" marker-start="url(#ah1)" marker-end="url(#ah1)"/>
-            <text class="d-label d-left" x="653" y="166">bind · locks</text>
-            <path class="d-arrow" d="M735 134 L735 166 L950 166 L950 188" marker-end="url(#ah1)"/>
-            <text class="d-label" x="860" y="160">4-bucket usage</text>
+            <rect x="440" y="50" width="330" height="266" rx="14" fill="#f4ffdf" stroke="#8fbe36" stroke-width="2"/>
+            <text class="d-title" x="605" y="74">LiteLLM gateway + CPR plugin</text>
+            <rect class="d-box" x="460" y="86" width="290" height="34" rx="8"/><text class="d-small" x="605" y="108">1  bind session · check locks · reserve cost</text>
+            <rect class="d-box" x="460" y="130" width="290" height="34" rx="8"/><text class="d-small" x="605" y="152">2  detect triggers in tool output</text>
+            <rect class="d-tag" x="460" y="174" width="290" height="34" rx="8"/><text class="d-small" x="605" y="196">3  decide(): features → menu → Q̂ → gate</text>
+            <rect class="d-box" x="460" y="218" width="290" height="34" rx="8"/><text class="d-small" x="605" y="240">4  apply packet: FULL · COMPACT · DROP</text>
+            <rect class="d-box" x="460" y="262" width="290" height="34" rx="8"/><text class="d-small" x="605" y="284">5  route to model · meter 4 token buckets</text>
+            <line class="d-arrow" x1="605" y1="120" x2="605" y2="128" marker-end="url(#ah1)"/>
+            <line class="d-arrow" x1="605" y1="164" x2="605" y2="172" marker-end="url(#ah1)"/>
+            <line class="d-arrow" x1="605" y1="208" x2="605" y2="216" marker-end="url(#ah1)"/>
+            <line class="d-arrow" x1="605" y1="252" x2="605" y2="260" marker-end="url(#ah1)"/>
 
+            <rect class="d-box" x="830" y="80" width="245" height="50" rx="10"/>
+            <text class="d-title" x="952" y="101">Session store</text><text class="d-sub" x="952" y="118">Redis: active model, packet, r_t</text>
+            <rect class="d-box" x="830" y="150" width="245" height="40" rx="10"/><text class="d-title" x="952" y="175">Cheap model</text>
+            <rect class="d-box" x="830" y="202" width="245" height="40" rx="10"/><text class="d-title" x="952" y="227">Strong model</text>
+            <rect class="d-box" x="830" y="258" width="245" height="50" rx="10"/>
+            <text class="d-title" x="952" y="279">Usage ledger</text><text class="d-sub" x="952" y="296">Postgres: tokens, $, latency</text>
+
+            <line class="d-arrow" x1="180" y1="176" x2="228" y2="176" marker-end="url(#ah1)"/>
+            <line class="d-arrow d-return" x1="230" y1="200" x2="182" y2="200" marker-end="url(#ah1)"/>
+            <text class="d-label" x="205" y="168">tool I/O</text>
+            <line class="d-arrow" x1="400" y1="176" x2="438" y2="176" marker-end="url(#ah1)"/>
+            <line class="d-arrow d-return" x1="440" y1="200" x2="402" y2="200" marker-end="url(#ah1)"/>
+            <text class="d-label" x="315" y="140">model: "cpr" + session header</text>
+            <path class="d-arrow d-return" d="M440 290 L315 290 L315 226" marker-end="url(#ah1)"/>
+            <text class="d-label" x="380" y="282">restart · snapshot</text><text class="d-label" x="380" y="306">callbacks</text>
+            <line class="d-arrow" x1="750" y1="103" x2="828" y2="105" marker-start="url(#ah1)" marker-end="url(#ah1)"/>
+            <line class="d-arrow" x1="750" y1="274" x2="828" y2="172" marker-end="url(#ah1)"/>
+            <line class="d-arrow" x1="750" y1="278" x2="828" y2="224" marker-end="url(#ah1)"/>
+            <line class="d-arrow" x1="750" y1="284" x2="828" y2="284" marker-end="url(#ah1)"/>
+
+            <g transform="translate(0,50)">
             <rect class="d-lane" x="10" y="300" width="1080" height="196" rx="14"/>
             <text class="d-lane-label" x="28" y="326">OFFLINE · LABEL FACTORY</text>
             <rect class="d-box" x="26" y="352" width="130" height="84" rx="10"/>
@@ -186,10 +188,6 @@
             <line class="d-arrow" x1="621" y1="394" x2="644" y2="394" marker-end="url(#ah1)"/>
             <line class="d-arrow" x1="776" y1="394" x2="799" y2="394" marker-end="url(#ah1)"/>
             <line class="d-arrow" x1="931" y1="394" x2="954" y2="394" marker-end="url(#ah1)"/>
-            <path class="d-arrow d-return" d="M150 134 L150 291 L246 291 L246 350" marker-end="url(#ah1)"/>
-            <text class="d-label d-left" x="158" y="205">snapshot</text><text class="d-label d-left" x="158" y="221">at checkpoint</text>
-            <path class="d-arrow" d="M1015 352 L1015 291 L370 291 L370 266" marker-end="url(#ah1)"/>
-            <text class="d-label" x="700" y="295">deploy frozen policy</text>
 
             <rect class="d-lane" x="10" y="514" width="1080" height="116" rx="14"/>
             <text class="d-lane-label" x="28" y="540">EVALUATION · HELD-OUT TEST SPLIT</text>
@@ -203,61 +201,97 @@
             <line class="d-arrow" x1="720" y1="583" x2="778" y2="583" marker-end="url(#ah1)"/>
             <path class="d-arrow d-return" d="M1015 436 L1015 506 L340 506 L340 550" marker-end="url(#ah1)"/>
             <text class="d-label" x="600" y="510">same frozen policies</text>
+            </g>
+            <path class="d-arrow d-return" d="M105 224 L105 341 L246 341 L246 400" marker-end="url(#ah1)"/>
+            <text class="d-label d-left" x="113" y="262">snapshot when</text><text class="d-label d-left" x="113" y="278">the gateway asks</text>
+            <path class="d-arrow" d="M1015 402 L1015 341 L700 341 L700 318" marker-end="url(#ah1)"/>
+            <text class="d-label" x="860" y="345">deploy frozen policy into decide()</text>
           </svg>
           </div>
           <figcaption><span class="swatch swatch-new"></span>to be built for CPR <span class="swatch swatch-old"></span>existing or off-the-shelf. Solid arrows are calls; dashed arrows are replies or data hand-offs. The gateway is the only path to a model, so every policy pays for tokens the same way.</figcaption>
         </figure>
 
         <div class="sub-heading reveal"><p class="kicker">Who owns what</p><h3>Each job has exactly one owner.</h3>
-          <p>The split follows what each piece can see. Only the harness controls the sandbox. Only the gateway sees billed tokens and tool-loop state. The controller is a pure function of features, so it can be swapped for any baseline.</p></div>
+          <p>The split follows what each piece can see. The gateway sees every message, every token bill and every open tool call, so it owns the decision. The harness owns only the sandbox. The decision engine is a pure function of features, so it can be swapped for any baseline.</p></div>
         <div class="component-grid reveal">
-          <article class="is-new"><span>New · gateway</span><h3>CPR gateway plugin</h3><p>LiteLLM pre- and post-call hooks.</p><ul><li>Maps <code>model: "cpr"</code> + a session header to the session's active model.</li><li>Blocks a switch while a tool call is unanswered or the provider holds state (B1).</li><li>Logs fresh, cache-read, cache-write and output tokens, and $ per call (B2, B4).</li><li>Reserves worst-case cost before dispatch and rejects calls over the cap.</li></ul><small>Runs on the LiteLLM, Redis and Postgres already in this repo.</small></article>
-          <article class="is-new"><span>New · harness</span><h3>Checkpoint hook</h3><p>Inside the agent loop, after all tool results return.</p><ul><li>Triggers: a test or build result; the same error 3× in 6 calls; first edit after exploring; a plan written; every k calls.</li><li>Calls <code>decide()</code>, then applies the answer: rebind the model, build the packet, or reset the sandbox.</li></ul><small>Harness: a minimal SWE-bench agent (for example mini-swe-agent).</small></article>
+          <article class="is-new"><span>New · gateway</span><h3>CPR gateway plugin</h3><p>LiteLLM pre- and post-call hooks; the decision point.</p><ul><li>Maps <code>model: "cpr"</code> + a session header to the session's state.</li><li>Blocks a switch while a tool call is unanswered or the provider holds state (B1).</li><li>Detects triggers in tool output and calls <code>decide()</code> in-process.</li><li>Applies the packet: rewrites messages for COMPACT or DROP and keeps them on later calls.</li><li>Logs four token buckets and $ per call (B2, B4); reserves worst-case cost and rejects calls over the cap.</li></ul><small>Runs on the LiteLLM, Redis and Postgres already in this repo.</small></article>
+          <article class="is-new"><span>New · harness</span><h3>Harness adapter</h3><p>A thin wrapper; the agent loop is unchanged.</p><ul><li>Opens a session and sends the session header on every call.</li><li>Optional evidence header: diff size and files touched.</li><li>Serves two callbacks: restart the sandbox, and take a snapshot (label collection only).</li></ul><small>In harness mode (option B below) this becomes the checkpoint hook that calls <code>decide()</code> itself.</small></article>
           <article class="is-new"><span>New · offline</span><h3>Snapshot service</h3><p>Makes a checkpoint restorable.</p><ul><li>Saves <code>docker commit</code> image, git diff, cwd and env, message log, r<sub>t</sub>, config and seed.</li><li>Replay check: restore, re-run the last tool calls, compare outputs and diff hash.</li><li>Snapshots that fail are excluded, not patched. Live processes are not captured.</li></ul></article>
           <article class="is-new"><span>New · offline</span><h3>Branch runner + evaluator</h3><p>Turns one snapshot into labelled outcomes.</p><ul><li>One job = snapshot × action × seed, in a fresh container with the residual budget.</li><li>Hidden tests run only after the branch ends and give Y.</li><li>Parallel workers, limited by Docker memory and provider rate limits.</li></ul></article>
-          <article class="is-new"><span>New · decision</span><h3>CPR controller</h3><p>Stateless scorer, trained offline and frozen.</p><ul><li>Features: test status, error repeats, edits, steps, context fill, cache warmth, lock, active model, steps since switch, r<sub>t</sub>, plus a frozen history embedding.</li><li>Menu F: allowed models × packets that fit the window and the remaining budget.</li><li>Q̂<sub>a</sub> = p̂<sub>a</sub> − λĈ<sub>a</sub> − ηL̂<sub>a</sub>; revise if the best Δ̂ exceeds τ.</li></ul></article>
+          <article class="is-new"><span>New · decision</span><h3>Decision engine</h3><p>Stateless scorer loaded inside the gateway plugin; trained offline and frozen.</p><ul><li>Triggers: a test or build result; the same error 3× in 6 calls; first edit after exploring; a plan written; every k calls.</li><li>Features: test status, error repeats, edits, steps, context fill, cache warmth, lock, active model, steps since switch, r<sub>t</sub>, plus a frozen history embedding.</li><li>Menu F: allowed models × packets that fit the window and the remaining budget.</li><li>Q̂<sub>a</sub> = p̂<sub>a</sub> − λĈ<sub>a</sub> − ηL̂<sub>a</sub>; revise if the best Δ̂ exceeds τ.</li></ul></article>
           <article class="is-reused"><span>Reused</span><h3>Existing stack</h3><p>Already in this repository.</p><ul><li>LiteLLM proxy, Postgres and Redis (<code>docker-compose.yml</code>).</li><li>Ollama for pipeline development on a laptop.</li><li>Harbor / Terminal-Bench runner.</li><li>LLMRouterBench Avengers-Pro baseline.</li></ul><small>None of these train or evaluate the checkpoint controller on their own.</small></article>
         </div>
 
         <figure class="diagram reveal" id="decision-sequence">
-          <p class="diagram-title"><span>FIG 2</span>One checkpoint, step by step</p>
+          <p class="diagram-title"><span>FIG 2</span>One checkpoint, step by step (gateway mode)</p>
           <div class="diagram-scroll">
-          <svg viewBox="0 0 1100 580" role="img" aria-labelledby="f2t f2d">
-            <title id="f2t">Sequence of one checkpoint decision</title>
-            <desc id="f2d">The harness sends call i through the gateway to the Cheap model. The reply asks for a tool; the harness runs tests in the sandbox, which report three failures. All tool results are back, so this is a quiescent boundary. A test-result trigger fires; the harness asks the controller to decide. The controller reads session state: no lock, warm cache, 1.20 dollars left. It scores the menu and returns Strong with a compact packet. The harness builds the packet and sends call i+1, which the gateway routes to Strong, charging a cold cache write.</desc>
+          <svg viewBox="0 0 1100 560" role="img" aria-labelledby="f2t f2d">
+            <title id="f2t">Sequence of one checkpoint decision made in the gateway</title>
+            <desc id="f2d">Call i goes from the harness to the gateway, which routes it to Cheap. Cheap asks to run tests; the harness runs pytest in the sandbox and three tests fail. The harness sends call i+1 with the test output appended. Because every request arrives after all tool results are back, the gateway is at a quiescent boundary. It checks locks, sees a test-result trigger, reads session state, scores the menu and decides to switch to Strong with a compact packet. It makes a summary call, rewrites the messages, sends them to Strong with a cold cache write, stores the new binding and returns the reply to the harness with decision headers.</desc>
             <defs><marker id="ah2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#111714"/></marker></defs>
-            <rect class="d-box" x="20" y="12" width="180" height="46" rx="10"/><text class="d-title" x="110" y="41">Task sandbox</text>
-            <rect class="d-new" x="240" y="12" width="180" height="46" rx="10"/><text class="d-title" x="330" y="41">Agent harness</text>
-            <rect class="d-new" x="470" y="12" width="180" height="46" rx="10"/><text class="d-title" x="560" y="41">CPR controller</text>
-            <rect class="d-new" x="700" y="12" width="180" height="46" rx="10"/><text class="d-title" x="790" y="41">Gateway + plugin</text>
-            <rect class="d-box" x="910" y="12" width="180" height="46" rx="10"/><text class="d-title" x="1000" y="41">Cheap / Strong</text>
-            <line class="d-life" x1="110" y1="58" x2="110" y2="570"/><line class="d-life" x1="330" y1="58" x2="330" y2="570"/><line class="d-life" x1="560" y1="58" x2="560" y2="570"/><line class="d-life" x1="790" y1="58" x2="790" y2="570"/><line class="d-life" x1="1000" y1="58" x2="1000" y2="570"/>
+            <rect class="d-box" x="20" y="12" width="170" height="46" rx="10"/><text class="d-title" x="105" y="41">Task sandbox</text>
+            <rect class="d-box" x="230" y="12" width="170" height="46" rx="10"/><text class="d-title" x="315" y="41">Agent harness</text>
+            <rect class="d-new" x="440" y="12" width="300" height="46" rx="10"/><text class="d-title" x="590" y="41">Gateway + CPR plugin</text>
+            <rect class="d-box" x="780" y="12" width="140" height="46" rx="10"/><text class="d-title" x="850" y="41">Session store</text>
+            <rect class="d-box" x="950" y="12" width="140" height="46" rx="10"/><text class="d-title" x="1020" y="41">Cheap / Strong</text>
+            <line class="d-life" x1="105" y1="58" x2="105" y2="550"/><line class="d-life" x1="315" y1="58" x2="315" y2="550"/><line class="d-life" x1="590" y1="58" x2="590" y2="550"/><line class="d-life" x1="850" y1="58" x2="850" y2="550"/><line class="d-life" x1="1020" y1="58" x2="1020" y2="550"/>
 
-            <line class="d-arrow" x1="330" y1="90" x2="788" y2="90" marker-end="url(#ah2)"/><text class="d-label" x="560" y="83">1  call i  (model: cpr, session S)</text>
-            <line class="d-arrow" x1="790" y1="122" x2="998" y2="122" marker-end="url(#ah2)"/><text class="d-label" x="895" y="115">2  forward to active: Cheap</text>
-            <line class="d-arrow d-return" x1="1000" y1="154" x2="792" y2="154" marker-end="url(#ah2)"/><text class="d-label" x="895" y="147">3  reply: run tests · usage</text>
-            <line class="d-arrow d-return" x1="790" y1="186" x2="332" y2="186" marker-end="url(#ah2)"/><text class="d-label" x="560" y="179">4  reply  (plugin logs 4-bucket cost)</text>
-            <line class="d-arrow" x1="330" y1="218" x2="112" y2="218" marker-end="url(#ah2)"/><text class="d-label" x="220" y="211">5  run pytest</text>
-            <line class="d-arrow d-return" x1="110" y1="250" x2="328" y2="250" marker-end="url(#ah2)"/><text class="d-label" x="220" y="243">6  3 tests fail</text>
+            <line class="d-arrow" x1="315" y1="88" x2="588" y2="88" marker-end="url(#ah2)"/><text class="d-label" x="452" y="81">1  call i  (model: cpr, session S)</text>
+            <line class="d-arrow" x1="590" y1="116" x2="1018" y2="116" marker-end="url(#ah2)"/><text class="d-label" x="805" y="109">2  hold → forward to Cheap</text>
+            <line class="d-arrow d-return" x1="1020" y1="144" x2="317" y2="144" marker-end="url(#ah2)"/><text class="d-label" x="670" y="137">3  reply: “run the tests”  (usage logged)</text>
+            <line class="d-arrow" x1="315" y1="172" x2="107" y2="172" marker-end="url(#ah2)"/><text class="d-label" x="210" y="165">4  run pytest</text>
+            <line class="d-arrow d-return" x1="105" y1="200" x2="313" y2="200" marker-end="url(#ah2)"/><text class="d-label" x="210" y="193">5  3 tests fail</text>
+            <line class="d-arrow" x1="315" y1="228" x2="588" y2="228" marker-end="url(#ah2)"/><text class="d-label" x="452" y="221">6  call i+1 with test output</text>
 
-            <rect x="20" y="266" width="1070" height="28" rx="6" fill="#f4ffdf" stroke="#8fbe36"/>
-            <text class="d-small" x="555" y="285">QUIESCENT BOUNDARY · all tool results returned · switching and snapshots allowed</text>
+            <rect x="20" y="242" width="1070" height="28" rx="6" fill="#f4ffdf" stroke="#8fbe36"/>
+            <text class="d-small" x="555" y="261">QUIESCENT BOUNDARY · a new request means every tool result is back · the gateway may decide</text>
 
-            <rect class="d-box" x="240" y="306" width="180" height="28" rx="6"/><text class="d-small" x="330" y="325">7  trigger: test result</text>
-            <line class="d-arrow" x1="330" y1="356" x2="558" y2="356" marker-end="url(#ah2)"/><text class="d-label" x="445" y="349">8  decide(H_t, r_t)</text>
-            <line class="d-arrow" x1="560" y1="388" x2="788" y2="388" marker-end="url(#ah2)"/><text class="d-label" x="675" y="381">9  read session state</text>
-            <line class="d-arrow d-return" x1="790" y1="420" x2="562" y2="420" marker-end="url(#ah2)"/><text class="d-label" x="675" y="413">10  no lock · cache warm · $1.20 left</text>
-            <rect class="d-new" x="460" y="434" width="200" height="28" rx="6"/><text class="d-small" x="560" y="453">11  score F → revise</text>
-            <line class="d-arrow d-return" x1="560" y1="486" x2="332" y2="486" marker-end="url(#ah2)"/><text class="d-label" x="445" y="479">12  (Strong, COMPACT)</text>
-            <line class="d-arrow" x1="330" y1="518" x2="788" y2="518" marker-end="url(#ah2)"/><text class="d-label" x="560" y="511">13  build packet · call i+1</text>
-            <line class="d-arrow" x1="790" y1="550" x2="998" y2="550" marker-end="url(#ah2)"/><text class="d-label" x="895" y="543">14  Strong · cold cache write</text>
+            <rect class="d-box" x="450" y="282" width="280" height="28" rx="6"/><text class="d-small" x="590" y="301">7  no open tool call · trigger: test result</text>
+            <line class="d-arrow" x1="590" y1="330" x2="848" y2="330" marker-end="url(#ah2)"/><text class="d-label" x="719" y="323">8  read state</text>
+            <line class="d-arrow d-return" x1="850" y1="356" x2="592" y2="356" marker-end="url(#ah2)"/><text class="d-label" x="719" y="349">9  Cheap · cache warm · $1.20 left</text>
+            <rect class="d-tag" x="450" y="370" width="280" height="28" rx="6"/><text class="d-small" x="590" y="389">10  decide(): revise → (Strong, COMPACT)</text>
+            <line class="d-arrow" x1="590" y1="420" x2="1018" y2="420" marker-end="url(#ah2)"/><text class="d-label" x="805" y="413">11  summary call → rewrite messages → Strong (cold cache write)</text>
+            <line class="d-arrow" x1="590" y1="448" x2="848" y2="448" marker-end="url(#ah2)"/><text class="d-label" x="719" y="441">12  store binding + packet</text>
+            <line class="d-arrow d-return" x1="1020" y1="476" x2="592" y2="476" marker-end="url(#ah2)"/><text class="d-label" x="805" y="469">13  Strong's reply</text>
+            <line class="d-arrow d-return" x1="590" y1="504" x2="317" y2="504" marker-end="url(#ah2)"/><text class="d-label" x="452" y="497">14  reply + x-cpr-model, x-cpr-decision</text>
+            <text class="d-sub" x="315" y="536">harness carries on as if nothing changed</text>
           </svg>
           </div>
-          <figcaption>Steps 1–6 are an ordinary agent turn; the plugin only binds and logs. A decision can happen only inside the green band. If the last reply had an unanswered tool call (a <b>tool-loop lock</b>), step 10 would report the lock and the controller could only hold. Example values are illustrative.</figcaption>
+          <figcaption>The harness never asks for a decision. Each request reaches the gateway only after the harness has fed back every tool result, so <b>each request is a quiescent boundary</b>. If the last assistant turn still had an unanswered tool call (a <b>tool-loop lock</b>), step 7 would fail and the gateway would hold. On later calls the gateway keeps replacing the old history with the stored packet. Example values are illustrative.</figcaption>
         </figure>
 
+        <div class="sub-heading reveal"><p class="kicker">Harness contract</p><h3>What the harness still does.</h3>
+          <p>With decisions in the gateway, the agent itself needs no changes. Any OpenAI-compatible agent (Harbor's <code>terminus-2</code>, mini-swe-agent) works by pointing at the gateway. The harness only handles what lives in the sandbox.</p></div>
+        <div class="table-wrap reveal"><table class="research-table is-compact">
+          <thead><tr><th scope="col">Interaction</th><th scope="col">Direction</th><th scope="col">When</th><th scope="col">Why the gateway can't do it alone</th></tr></thead>
+          <tbody>
+            <tr><th scope="row"><code>POST /cpr/sessions</code></th><td>harness → gateway</td><td>Once per episode: task id, caps, deadline</td><td>The gateway doesn't know the task or its budget</td></tr>
+            <tr><th scope="row"><code>model: "cpr"</code> + <code>x-cpr-session</code></th><td>harness → gateway</td><td>Every model call</td><td>Ties stateless chat requests to one session</td></tr>
+            <tr><th scope="row"><code>x-cpr-evidence</code> (optional)</th><td>harness → gateway</td><td>Any call</td><td>Diff size and files touched are on disk, not in the messages. Test output already is</td></tr>
+            <tr><th scope="row">Restart callback</th><td>gateway → harness</td><td>Only if RESTART is chosen</td><td>Discarding edits needs a container reset. The gateway replies <code>x-cpr-action: restart</code>; the harness resets and starts a fresh conversation on the same session and remaining budget</td></tr>
+            <tr><th scope="row"><code>POST /snapshot</code></th><td>gateway → harness</td><td>Label collection only, at a sampled checkpoint</td><td>The container belongs to the harness. The harness is blocked waiting for the reply, so the sandbox is quiet</td></tr>
+            <tr><th scope="row">Hidden tests → Y</th><td>evaluator only</td><td>After the episode</td><td>Outcomes must never reach the router</td></tr>
+          </tbody>
+        </table></div>
+        <aside class="data-caveat reveal"><b>Two things the gateway must handle carefully.</b> (1) <b>Packet persistence:</b> after a COMPACT or DROP at call j, the harness keeps sending its full history, so the gateway swaps messages 0…j for the stored packet on every later call. It keys this on a hash of that prefix; if the agent trims its own history and the hash no longer matches, the gateway holds rather than guessing. (2) <b>Latency on the request path:</b> scoring is fast, but COMPACT adds a summary call before the model call. It is measured and counted in L.</aside>
+
+        <div class="sub-heading reveal"><p class="kicker">Deployment options</p><h3>Gateway mode is the default. Harness mode is an option.</h3>
+          <p>Both use the same <code>decide()</code>, menu, ledger and locks, so results from either are comparable. They differ only in which component calls <code>decide()</code>.</p></div>
+        <div class="table-wrap reveal"><table class="research-table is-compact">
+          <thead><tr><th scope="col"></th><th scope="col">A · Gateway mode (default)</th><th scope="col">B · Harness mode (option)</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">Who calls <code>decide()</code></th><td>CPR plugin, on each incoming request</td><td>A checkpoint hook in the agent loop, after tool results</td></tr>
+            <tr><th scope="row">Agent changes</th><td>None; point it at <code>model: "cpr"</code></td><td>Hook code in every agent you test</td></tr>
+            <tr><th scope="row">Triggers seen from</th><td>Messages and tool output, plus optional <code>x-cpr-evidence</code></td><td>Full workspace (files, diff, test runner) directly</td></tr>
+            <tr><th scope="row">Packet construction</th><td>Gateway rewrites messages and keeps the packet on later calls</td><td>Harness rebuilds its own history once</td></tr>
+            <tr><th scope="row">RESTART and snapshots</th><td>Callback to the harness</td><td>Local to the harness</td></tr>
+            <tr><th scope="row">Matches baselines</th><td>Same shape as vLLM SR and LiteLLM routers, which also run in the gateway</td><td>Same shape as fixed-prefix and handoff studies, which run in the agent</td></tr>
+            <tr><th scope="row">Pick when</th><td>Running many agents unchanged, and deploying CPR as a gateway feature</td><td>The agent drops or rewrites its own history, or triggers need workspace state not visible in messages</td></tr>
+          </tbody>
+        </table></div>
+
         <div class="sub-heading reveal"><p class="kicker">Interface</p><h3>One call for every policy.</h3>
-          <p>CPR, the fixed-prefix rule, the per-call router, SAAR and every other baseline implement the same method. They see the same state and choose from the same menu, so differences come from the policy, not from the plumbing.</p></div>
+          <p>The gateway calls this function. CPR, the fixed-prefix rule, the per-call router, SAAR and every other baseline implement it, so swapping a policy is a config change in the gateway. They see the same state and choose from the same menu, so differences come from the policy, not from the plumbing.</p></div>
         <pre class="api-block reveal"><code>decide(state) → HOLD | Allocation(model, packet, budget)
 
 state  = CheckpointState(
@@ -276,7 +310,7 @@ packet ∈ {FULL, COMPACT, DROP, RESTART}       budget fixed in v1</code></pre>
             <tr><th scope="row"><code>checkpoints</code></th><td>checkpoint</td><td>episode, step, trigger, feature version, snapshot reference, replay-check result, sampling weight</td></tr>
             <tr><th scope="row"><code>branches</code></th><td>checkpoint × action</td><td>action (model, packet), continuation protocol μ</td></tr>
             <tr><th scope="row"><code>trials</code></th><td>stochastic repeat</td><td>branch, seed, Y, fresh / cache-read / cache-write / output tokens, C<sup>rem</sup>, L<sup>rem</sup>, handoff overhead, cache state</td></tr>
-            <tr><th scope="row"><code>calls</code></th><td>model call</td><td>session, model, packet, four token buckets, $, latency, lock state (written by the gateway plugin)</td></tr>
+            <tr><th scope="row"><code>calls</code></th><td>model call</td><td>session, model, packet, decision id, trigger, four token buckets, $, latency, lock state (written by the gateway plugin)</td></tr>
           </tbody>
         </table></div>
 
@@ -286,7 +320,7 @@ packet ∈ {FULL, COMPACT, DROP, RESTART}       budget fixed in v1</code></pre>
           <tbody>
             <tr><th scope="row">First benchmark</th><td>SWE-bench Verified; Terminal-Bench second</td><td>Hidden tests give Y. The workspace is mostly a git diff, so snapshots restore reliably. The Handoff Tax uses it, so results compare directly.</td></tr>
             <tr><th scope="row">Model pair</th><td>One Cheap/Strong API pair with prompt caching, pinned before collection. The local Ollama pair is for pipeline development only.</td><td>The local 7B/8B pair has no real capability gap and reports no cache tokens, so it cannot measure gap recovered or cache cost.</td></tr>
-            <tr><th scope="row">Where decisions run</th><td>In the harness; all model traffic through the gateway</td><td>Only the harness can snapshot, reset or rewrite the sandbox. Only the gateway sees billed tokens and tool-loop state.</td></tr>
+            <tr><th scope="row">Where decisions run</th><td>In the LiteLLM gateway (mode A); harness mode (B) as an option</td><td>The gateway already sees every message, token bill and open tool call, and agents need no changes. The harness is called back only for restart and snapshots.</td></tr>
             <tr><th scope="row">Snapshot method</th><td><code>docker commit</code> + git diff + message log + r<sub>t</sub></td><td>Simple and checkable. Tasks that need live background services are excluded or documented.</td></tr>
             <tr><th scope="row">Cost of repeated trials</th><td>Store raw token counts; recompute cost under the cache state a real deployment would see</td><td>Repeated branches from one snapshot hit a warm provider cache and would look too cheap. Billed cost is reported alongside.</td></tr>
             <tr><th scope="row">Learner</th><td>Calibrated logistic or gradient-boosted predictors; no RL in v1</td><td>The data is small and calibration matters more than capacity. RL is justified only if Phase 1 shows the value exists.</td></tr>
