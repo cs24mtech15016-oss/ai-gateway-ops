@@ -8,9 +8,9 @@
     <meta property="og:title" content="CheckpointRouter — Long-Horizon Agent Routing" />
     <meta property="og:description" content="Selective model and context routing for a single long-horizon agent at meaningful execution checkpoints. Bounded experimental phases." />
     <meta property="og:type" content="website" />
-    <title>Evaluation and contributions — CheckpointRouter</title>
+    <title>Evaluation plan and contributions — CheckpointRouter</title>
     <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="styles.css?v=3" />
+    <link rel="stylesheet" href="styles.css?v=4" />
     <script src="app.js?v=3" defer></script>
   </head>
   <body>
@@ -34,18 +34,253 @@
     </header>
 
     <main id="main">
-      <section class="section page-first section-dark" id="evaluation">
-        <div class="section-heading reveal"><span class="section-number">10</span><div>
-          <p class="kicker">Evaluation</p><h2>Test the claim—not a weaker opponent.</h2>
+      <section class="section page-first section-light" id="how-we-evaluate">
+        <div class="section-heading reveal"><span class="section-number">11</span><div>
+          <p class="kicker">How we evaluate</p><h2>Three tests, in order. Each can stop the project.</h2>
+          <p class="section-intro">Evaluation answers three questions in sequence. <b>Is there value to capture?</b> (offline, from branch labels). <b>Can a policy predict it?</b> (offline, held-out repositories). <b>Does the frozen policy save money in real episodes?</b> (closed loop, test split). Only the third is the result; the first two decide whether to keep going.</p>
+        </div></div>
+
+        <figure class="diagram reveal" id="eval-pipeline">
+          <p class="diagram-title"><span>FIG 4</span>Evaluation pipeline</p>
+          <div class="diagram-scroll">
+          <svg viewBox="0 0 1100 360" role="img" aria-labelledby="f4t f4d">
+            <title id="f4t">Evaluation pipeline</title>
+            <desc id="f4d">Tasks are split by repository into train, dev and test before any run. Train produces branch labels; test 1 asks whether switch advantage varies by state. The trainer fits predictors on train; test 2 checks calibration and ranking on held-out dev repositories. Dev tunes lambda, eta and tau and freezes the policy. Test 3 runs CPR and all baselines closed-loop on the test split with k repeats each and reports the operating point with paired confidence intervals.</desc>
+            <defs><marker id="ah4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#111714"/></marker></defs>
+            <rect class="d-box" x="20" y="130" width="150" height="100" rx="12"/>
+            <text class="d-title" x="95" y="160">Task pool</text><text class="d-sub" x="95" y="182">split by repository</text><text class="d-sub" x="95" y="200">before any run</text>
+            <path class="d-arrow" d="M170 160 C200 160 200 62 228 62" marker-end="url(#ah4)"/>
+            <path class="d-arrow" d="M170 180 L228 180" marker-end="url(#ah4)"/>
+            <path class="d-arrow" d="M170 200 C200 200 200 298 228 298" marker-end="url(#ah4)"/>
+            <rect class="d-tag" x="230" y="44" width="70" height="36" rx="8"/><text class="d-small" x="265" y="67">train</text>
+            <rect class="d-tag" x="230" y="162" width="70" height="36" rx="8"/><text class="d-small" x="265" y="185">dev</text>
+            <rect class="d-tag" x="230" y="280" width="70" height="36" rx="8"/><text class="d-small" x="265" y="303">test</text>
+
+            <rect class="d-new" x="340" y="24" width="220" height="76" rx="12"/>
+            <text class="d-title" x="450" y="52">Test 1 · Value exists?</text><text class="d-sub" x="450" y="72">branch labels: does Δ vary</text><text class="d-sub" x="450" y="88">across checkpoint states?</text>
+            <rect class="d-new" x="600" y="24" width="220" height="76" rx="12"/>
+            <text class="d-title" x="710" y="52">Fit predictors</text><text class="d-sub" x="710" y="72">p̂, Ĉ, L̂ per action</text><text class="d-sub" x="710" y="88">same features for all</text>
+            <rect class="d-new" x="600" y="142" width="220" height="76" rx="12"/>
+            <text class="d-title" x="710" y="170">Test 2 · Predictable?</text><text class="d-sub" x="710" y="190">calibration and ranking on</text><text class="d-sub" x="710" y="206">held-out dev repositories</text>
+            <rect class="d-box" x="860" y="142" width="220" height="76" rx="12"/>
+            <text class="d-title" x="970" y="170">Tune + freeze</text><text class="d-sub" x="970" y="190">λ, η, τ, K on dev only</text><text class="d-sub" x="970" y="206">hash every policy</text>
+            <rect class="d-new" x="340" y="262" width="480" height="76" rx="12"/>
+            <text class="d-title" x="580" y="290">Test 3 · Saves money in real episodes?</text><text class="d-sub" x="580" y="310">CPR + every baseline, closed loop, k repeats per task</text><text class="d-sub" x="580" y="326">success, $, latency · paired, repo-clustered CIs</text>
+            <rect class="d-ink" x="860" y="262" width="220" height="76" rx="12"/>
+            <text class="d-title d-on-ink" x="970" y="292">Primary result</text><text class="d-sub d-on-ink" x="970" y="314">pass / fail the declared</text><text class="d-sub d-on-ink" x="970" y="330">operating point</text>
+
+            <line class="d-arrow" x1="300" y1="62" x2="338" y2="62" marker-end="url(#ah4)"/>
+            <line class="d-arrow" x1="560" y1="62" x2="598" y2="62" marker-end="url(#ah4)"/>
+            <line class="d-arrow" x1="710" y1="100" x2="710" y2="140" marker-end="url(#ah4)"/>
+            <line class="d-arrow" x1="300" y1="180" x2="598" y2="180" marker-end="url(#ah4)"/>
+            <text class="d-label" x="450" y="172">dev states</text>
+            <line class="d-arrow" x1="820" y1="180" x2="858" y2="180" marker-end="url(#ah4)"/>
+            <path class="d-arrow" d="M970 218 L970 240 L700 240 L700 260" marker-end="url(#ah4)"/>
+            <text class="d-label" x="835" y="236">frozen policies</text>
+            <line class="d-arrow" x1="300" y1="298" x2="338" y2="298" marker-end="url(#ah4)"/>
+            <line class="d-arrow" x1="820" y1="300" x2="858" y2="300" marker-end="url(#ah4)"/>
+            <text class="d-label d-coral" x="450" y="122">stop if no</text>
+            <text class="d-label d-coral" x="640" y="234">stop if no</text>
+          </svg>
+          </div>
+          <figcaption>Test-split tasks are never used for labels, features, tuning or thresholds. Every threshold, price card and margin is written down before Test 3 runs. If Test 1 finds one action wins at every checkpoint, a fixed rule is the answer and no learned policy is built.</figcaption>
+        </figure>
+
+        <div class="sub-heading reveal"><p class="kicker">Test 1 and Test 2 · offline</p><h3>What each offline test measures.</h3></div>
+        <div class="table-wrap reveal"><table class="research-table is-compact">
+          <thead><tr><th scope="col">Test</th><th scope="col">Question</th><th scope="col">Measured as</th><th scope="col">Passes when</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">1 · Value exists</th><td>Does the best action depend on the checkpoint state?</td><td>Δ<sub>a</sub> = Q<sub>a</sub> − Q<sub>cheap</sub> per checkpoint, averaged over k trials, split by trigger and session stage</td><td>The best action differs across states by more than trial noise (paired CIs exclude zero in at least two strata)</td></tr>
+            <tr><th scope="row">1 · Packet matters</th><td>Does the packet change the outcome of a switch?</td><td>Y and C<sup>rem</sup> for FULL vs COMPACT vs DROP from the same snapshot</td><td>Packet effect differs by state, not just by switch direction (needed for the D3/D4 claim)</td></tr>
+            <tr><th scope="row">2 · Calibrated</th><td>Are predicted success rates trustworthy?</td><td>Brier score, log loss and reliability curve of p̂<sub>a</sub> on held-out dev repositories</td><td>Beats a task-only predictor with the same capacity and data</td></tr>
+            <tr><th scope="row">2 · Ranks well</th><td>Does Q̂ pick the right action?</td><td>Regret against the sampled-branch hindsight selector, measured on independent repeats</td><td>Regret lower than every fixed action and the per-call predictor</td></tr>
+          </tbody>
+        </table></div>
+
+        <div class="sub-heading reveal"><p class="kicker">Test 3 · closed loop</p><h3>Same harness, same menu, only the policy changes.</h3>
+          <p>Each policy plugs into the same <code>decide()</code> call (Fig. 1). It sees the same features, model pool and packet menu, with the same caps and the same training data where it learns. A comparison that changes anything else is not reported as a policy comparison.</p></div>
+        <div class="table-wrap reveal"><table class="research-table is-compact">
+          <thead><tr><th scope="col">Baseline</th><th scope="col">When it decides</th><th scope="col">What it chooses</th><th scope="col">What beating it shows</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">Always Cheap / always Strong</th><td>Never</td><td>One model</td><td>The two ends of the cost–success curve; anchor for gap recovered</td></tr>
+            <tr><th scope="row">LiteLLM complexity router</th><td>Each request, prompt only</td><td>Model tier</td><td>Gains over what this repository runs today</td></tr>
+            <tr><th scope="row">Avengers-Pro (3 variants)</th><td>Request · per call · checkpoint state</td><td>Model</td><td>Gains are not just from a better request router</td></tr>
+            <tr><th scope="row">vLLM SR session-aware</th><td>Each turn, with locks and hand-tuned switch penalties</td><td>Model</td><td>Measured continuation value beats hand-tuned penalties</td></tr>
+            <tr><th scope="row">Fixed-prefix(K)</th><td>Once, after K calls (K tuned on dev)</td><td>Model + packet</td><td>Adaptive timing beats one fixed decision point (A4)</td></tr>
+            <tr><th scope="row">Per-call, same predictor</th><td>Every unlocked boundary, may hold</td><td>Model + packet</td><td>Checkpoints are not just fewer decisions (A4)</td></tr>
+            <tr><th scope="row">MTRouter-like</th><td>Each turn, outcome-trained</td><td>Model</td><td>Joint packet choice adds value over model-only routing</td></tr>
+            <tr><th scope="row">ReDAct-style deferral</th><td>Uncertain steps, then back to Cheap</td><td>Model, one step</td><td>Remaining-episode value beats local risk</td></tr>
+            <tr><th scope="row">Best fixed packet (Handoff Tax)</th><td>CPR's timing</td><td>Model; packet fixed per direction</td><td>Choosing the packet per state beats the best fixed packet (D3)</td></tr>
+            <tr><th scope="row">Composed selectors</th><td>CPR's timing</td><td>Model and packet tuned separately</td><td>Choosing them jointly beats tuning them separately (D4)</td></tr>
+          </tbody>
+        </table></div>
+
+        <figure class="diagram reveal" id="timing">
+          <p class="diagram-title"><span>FIG 5</span>The timing comparison (rubric A4)</p>
+          <div class="diagram-scroll">
+          <svg viewBox="0 0 1100 310" role="img" aria-labelledby="f5t f5d">
+            <title id="f5t">Where each timing policy may decide, on one example episode</title>
+            <desc id="f5d">One episode of 20 model calls. Request-level decides only before call 1. Fixed-prefix decides once after call K equals 6. Per-call may decide at every unlocked boundary; boundaries 9 and 10 are locked by a tool loop. Adaptive checkpoint decides only where a trigger fires: a test result at call 7, an error repeat at call 12 and a test result at call 17. All four share the same predictor, menu and caps.</desc>
+            <text class="d-sub d-left" x="230" y="24">model call number (marks sit at the boundary before each call)</text>
+            <rect x="596.5" y="56" width="74.5" height="228" rx="6" fill="#fff5f0" stroke="#ff7a5c" stroke-dasharray="4 4"/>
+            <text class="d-coral" x="633.8" y="298" text-anchor="middle" font-size="11">tool-loop lock</text>
+            <g id="t-rows">
+              <text class="d-title d-left" x="20" y="72">Request-level</text><text class="d-sub d-left" x="20" y="90">before the first call</text>
+              <text class="d-title d-left" x="20" y="132">Fixed-prefix (K = 6)</text><text class="d-sub d-left" x="20" y="150">once, after K calls</text>
+              <text class="d-title d-left" x="20" y="192">Per-call</text><text class="d-sub d-left" x="20" y="210">every unlocked boundary</text>
+              <text class="d-title d-left" x="20" y="252">Adaptive checkpoint</text><text class="d-sub d-left" x="20" y="270">only where a trigger fires</text>
+              <line class="d-grid" x1="230" y1="80" x2="1080" y2="80"/>
+              <line class="d-grid" x1="230.0" y1="75" x2="230.0" y2="85"/>
+              <line class="d-grid" x1="272.5" y1="75" x2="272.5" y2="85"/>
+              <line class="d-grid" x1="315.0" y1="75" x2="315.0" y2="85"/>
+              <line class="d-grid" x1="357.5" y1="75" x2="357.5" y2="85"/>
+              <line class="d-grid" x1="400.0" y1="75" x2="400.0" y2="85"/>
+              <line class="d-grid" x1="442.5" y1="75" x2="442.5" y2="85"/>
+              <line class="d-grid" x1="485.0" y1="75" x2="485.0" y2="85"/>
+              <line class="d-grid" x1="527.5" y1="75" x2="527.5" y2="85"/>
+              <line class="d-grid" x1="570.0" y1="75" x2="570.0" y2="85"/>
+              <line class="d-grid" x1="612.5" y1="75" x2="612.5" y2="85"/>
+              <line class="d-grid" x1="655.0" y1="75" x2="655.0" y2="85"/>
+              <line class="d-grid" x1="697.5" y1="75" x2="697.5" y2="85"/>
+              <line class="d-grid" x1="740.0" y1="75" x2="740.0" y2="85"/>
+              <line class="d-grid" x1="782.5" y1="75" x2="782.5" y2="85"/>
+              <line class="d-grid" x1="825.0" y1="75" x2="825.0" y2="85"/>
+              <line class="d-grid" x1="867.5" y1="75" x2="867.5" y2="85"/>
+              <line class="d-grid" x1="910.0" y1="75" x2="910.0" y2="85"/>
+              <line class="d-grid" x1="952.5" y1="75" x2="952.5" y2="85"/>
+              <line class="d-grid" x1="995.0" y1="75" x2="995.0" y2="85"/>
+              <line class="d-grid" x1="1037.5" y1="75" x2="1037.5" y2="85"/>
+              <line class="d-grid" x1="1080.0" y1="75" x2="1080.0" y2="85"/>
+              <circle class="d-dot" cx="230.0" cy="80" r="7"><title>may decide at boundary 0</title></circle>
+              <line class="d-grid" x1="230" y1="140" x2="1080" y2="140"/>
+              <line class="d-grid" x1="230.0" y1="135" x2="230.0" y2="145"/>
+              <line class="d-grid" x1="272.5" y1="135" x2="272.5" y2="145"/>
+              <line class="d-grid" x1="315.0" y1="135" x2="315.0" y2="145"/>
+              <line class="d-grid" x1="357.5" y1="135" x2="357.5" y2="145"/>
+              <line class="d-grid" x1="400.0" y1="135" x2="400.0" y2="145"/>
+              <line class="d-grid" x1="442.5" y1="135" x2="442.5" y2="145"/>
+              <line class="d-grid" x1="485.0" y1="135" x2="485.0" y2="145"/>
+              <line class="d-grid" x1="527.5" y1="135" x2="527.5" y2="145"/>
+              <line class="d-grid" x1="570.0" y1="135" x2="570.0" y2="145"/>
+              <line class="d-grid" x1="612.5" y1="135" x2="612.5" y2="145"/>
+              <line class="d-grid" x1="655.0" y1="135" x2="655.0" y2="145"/>
+              <line class="d-grid" x1="697.5" y1="135" x2="697.5" y2="145"/>
+              <line class="d-grid" x1="740.0" y1="135" x2="740.0" y2="145"/>
+              <line class="d-grid" x1="782.5" y1="135" x2="782.5" y2="145"/>
+              <line class="d-grid" x1="825.0" y1="135" x2="825.0" y2="145"/>
+              <line class="d-grid" x1="867.5" y1="135" x2="867.5" y2="145"/>
+              <line class="d-grid" x1="910.0" y1="135" x2="910.0" y2="145"/>
+              <line class="d-grid" x1="952.5" y1="135" x2="952.5" y2="145"/>
+              <line class="d-grid" x1="995.0" y1="135" x2="995.0" y2="145"/>
+              <line class="d-grid" x1="1037.5" y1="135" x2="1037.5" y2="145"/>
+              <line class="d-grid" x1="1080.0" y1="135" x2="1080.0" y2="145"/>
+              <circle class="d-dot" cx="485.0" cy="140" r="7"><title>may decide at boundary 6</title></circle>
+              <line class="d-grid" x1="230" y1="200" x2="1080" y2="200"/>
+              <line class="d-grid" x1="230.0" y1="195" x2="230.0" y2="205"/>
+              <line class="d-grid" x1="272.5" y1="195" x2="272.5" y2="205"/>
+              <line class="d-grid" x1="315.0" y1="195" x2="315.0" y2="205"/>
+              <line class="d-grid" x1="357.5" y1="195" x2="357.5" y2="205"/>
+              <line class="d-grid" x1="400.0" y1="195" x2="400.0" y2="205"/>
+              <line class="d-grid" x1="442.5" y1="195" x2="442.5" y2="205"/>
+              <line class="d-grid" x1="485.0" y1="195" x2="485.0" y2="205"/>
+              <line class="d-grid" x1="527.5" y1="195" x2="527.5" y2="205"/>
+              <line class="d-grid" x1="570.0" y1="195" x2="570.0" y2="205"/>
+              <line class="d-grid" x1="612.5" y1="195" x2="612.5" y2="205"/>
+              <line class="d-grid" x1="655.0" y1="195" x2="655.0" y2="205"/>
+              <line class="d-grid" x1="697.5" y1="195" x2="697.5" y2="205"/>
+              <line class="d-grid" x1="740.0" y1="195" x2="740.0" y2="205"/>
+              <line class="d-grid" x1="782.5" y1="195" x2="782.5" y2="205"/>
+              <line class="d-grid" x1="825.0" y1="195" x2="825.0" y2="205"/>
+              <line class="d-grid" x1="867.5" y1="195" x2="867.5" y2="205"/>
+              <line class="d-grid" x1="910.0" y1="195" x2="910.0" y2="205"/>
+              <line class="d-grid" x1="952.5" y1="195" x2="952.5" y2="205"/>
+              <line class="d-grid" x1="995.0" y1="195" x2="995.0" y2="205"/>
+              <line class="d-grid" x1="1037.5" y1="195" x2="1037.5" y2="205"/>
+              <line class="d-grid" x1="1080.0" y1="195" x2="1080.0" y2="205"/>
+              <circle class="d-dot" cx="230.0" cy="200" r="7"><title>may decide at boundary 0</title></circle>
+              <circle class="d-dot" cx="272.5" cy="200" r="7"><title>may decide at boundary 1</title></circle>
+              <circle class="d-dot" cx="315.0" cy="200" r="7"><title>may decide at boundary 2</title></circle>
+              <circle class="d-dot" cx="357.5" cy="200" r="7"><title>may decide at boundary 3</title></circle>
+              <circle class="d-dot" cx="400.0" cy="200" r="7"><title>may decide at boundary 4</title></circle>
+              <circle class="d-dot" cx="442.5" cy="200" r="7"><title>may decide at boundary 5</title></circle>
+              <circle class="d-dot" cx="485.0" cy="200" r="7"><title>may decide at boundary 6</title></circle>
+              <circle class="d-dot" cx="527.5" cy="200" r="7"><title>may decide at boundary 7</title></circle>
+              <circle class="d-dot" cx="570.0" cy="200" r="7"><title>may decide at boundary 8</title></circle>
+              <circle class="d-dot" cx="697.5" cy="200" r="7"><title>may decide at boundary 11</title></circle>
+              <circle class="d-dot" cx="740.0" cy="200" r="7"><title>may decide at boundary 12</title></circle>
+              <circle class="d-dot" cx="782.5" cy="200" r="7"><title>may decide at boundary 13</title></circle>
+              <circle class="d-dot" cx="825.0" cy="200" r="7"><title>may decide at boundary 14</title></circle>
+              <circle class="d-dot" cx="867.5" cy="200" r="7"><title>may decide at boundary 15</title></circle>
+              <circle class="d-dot" cx="910.0" cy="200" r="7"><title>may decide at boundary 16</title></circle>
+              <circle class="d-dot" cx="952.5" cy="200" r="7"><title>may decide at boundary 17</title></circle>
+              <circle class="d-dot" cx="995.0" cy="200" r="7"><title>may decide at boundary 18</title></circle>
+              <circle class="d-dot" cx="1037.5" cy="200" r="7"><title>may decide at boundary 19</title></circle>
+              <line class="d-grid" x1="230" y1="260" x2="1080" y2="260"/>
+              <line class="d-grid" x1="230.0" y1="255" x2="230.0" y2="265"/>
+              <line class="d-grid" x1="272.5" y1="255" x2="272.5" y2="265"/>
+              <line class="d-grid" x1="315.0" y1="255" x2="315.0" y2="265"/>
+              <line class="d-grid" x1="357.5" y1="255" x2="357.5" y2="265"/>
+              <line class="d-grid" x1="400.0" y1="255" x2="400.0" y2="265"/>
+              <line class="d-grid" x1="442.5" y1="255" x2="442.5" y2="265"/>
+              <line class="d-grid" x1="485.0" y1="255" x2="485.0" y2="265"/>
+              <line class="d-grid" x1="527.5" y1="255" x2="527.5" y2="265"/>
+              <line class="d-grid" x1="570.0" y1="255" x2="570.0" y2="265"/>
+              <line class="d-grid" x1="612.5" y1="255" x2="612.5" y2="265"/>
+              <line class="d-grid" x1="655.0" y1="255" x2="655.0" y2="265"/>
+              <line class="d-grid" x1="697.5" y1="255" x2="697.5" y2="265"/>
+              <line class="d-grid" x1="740.0" y1="255" x2="740.0" y2="265"/>
+              <line class="d-grid" x1="782.5" y1="255" x2="782.5" y2="265"/>
+              <line class="d-grid" x1="825.0" y1="255" x2="825.0" y2="265"/>
+              <line class="d-grid" x1="867.5" y1="255" x2="867.5" y2="265"/>
+              <line class="d-grid" x1="910.0" y1="255" x2="910.0" y2="265"/>
+              <line class="d-grid" x1="952.5" y1="255" x2="952.5" y2="265"/>
+              <line class="d-grid" x1="995.0" y1="255" x2="995.0" y2="265"/>
+              <line class="d-grid" x1="1037.5" y1="255" x2="1037.5" y2="265"/>
+              <line class="d-grid" x1="1080.0" y1="255" x2="1080.0" y2="265"/>
+              <circle class="d-dot" cx="527.5" cy="260" r="7"><title>may decide at boundary 7</title></circle>
+              <circle class="d-dot" cx="740.0" cy="260" r="7"><title>may decide at boundary 12</title></circle>
+              <circle class="d-dot" cx="952.5" cy="260" r="7"><title>may decide at boundary 17</title></circle>
+              <text class="d-label" x="527.5" y="244">tests ran</text>
+              <text class="d-label" x="740.0" y="244">same error ×3</text>
+              <text class="d-label" x="952.5" y="244">tests ran</text>
+              <text class="d-label" x="485.0" y="124">K = 6</text>
+              <text class="d-sub" x="251.2" y="48">1</text>
+              <text class="d-sub" x="421.2" y="48">5</text>
+              <text class="d-sub" x="633.8" y="48">10</text>
+              <text class="d-sub" x="846.2" y="48">15</text>
+              <text class="d-sub" x="1058.8" y="48">20</text>
+            </g>
+          </svg>
+          </div>
+          <figcaption>Each dot is a point where the policy is allowed to decide (it may still hold). <b>All four share one predictor, menu, pool and caps</b>; only the set of decision points differs, so any difference in cost or success is due to timing. Per-call has the most chances to act but also pays more router overhead and risks thrashing.</figcaption>
+        </figure>
+
+        <div class="sub-heading reveal"><p class="kicker">The verdict</p><h3>How a result is read.</h3>
+          <p>The claim is accepted only if the frozen policy passes all three checks on the test split, against the strongest baseline, with every cost included.</p></div>
+        <div class="table-wrap reveal"><table class="research-table is-compact">
+          <thead><tr><th scope="col">Check</th><th scope="col">Rule (fixed before test)</th><th scope="col">Example</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">Success kept</th><td>Lower CI bound of Y<sub>CPR</sub> − Y<sub>ref</sub> ≥ −ε</td><td>ε = 0.02 means at most two percentage points below always-Strong</td></tr>
+            <tr><th scope="row">Cost saved</th><td>Upper CI bound of C<sub>CPR</sub> − C<sub>best baseline</sub> &lt; 0, both meeting the success rule</td><td>Cheaper than the cheapest baseline that also keeps success</td></tr>
+            <tr><th scope="row">Latency within budget</th><td>Mean episode wall time ≤ B<sub>L</sub>; report p50 and p95</td><td>Includes tool waits, packet calls and router time</td></tr>
+            <tr><th scope="row">Also reported</th><td>Gap recovered (Y<sub>π</sub> − Y<sub>cheap</sub>) / (Y<sub>strong</sub> − Y<sub>cheap</sub>) with C<sub>π</sub> / C<sub>strong</sub>; switches, thrash, lock-blocked switches, cache tokens lost</td><td>Shows <em>how</em> the saving was made, not just that it was</td></tr>
+          </tbody>
+        </table></div>
+        <aside class="honesty-note reveal"><strong>A negative result is still a result</strong><p>If an equally informed per-call policy, the best fixed packet or the composed selectors match CPR after all overhead, the report says so, and the simpler policy is the recommendation. The branch dataset and the measured handoff costs remain useful contributions either way.</p></aside>
+      </section>
+      <section class="section section-dark" id="evaluation">
+        <div class="section-heading reveal"><span class="section-number">12</span><div>
+          <p class="kicker">Measurements and rules</p><h2>Test the claim—not a weaker opponent.</h2>
           <p class="section-intro">Each phase has a matched action space and baselines. Offline prediction is diagnostic; the decisive result is a fresh, closed-loop episode comparison including routing, context-transfer, and cache-loss overhead.</p>
         </div></div>
         <div class="evaluation-layout reveal">
-          <div><h3>Required comparison families</h3>
+          <div><h3>Comparison families by phase</h3>
             <ol class="baseline-list">
               <li><b>Always Cheap / always Strong:</b> initial-state endpoints under identical scaffold and episode caps.</li>
               <li><b>Task-only and simple rules:</b> initial Strong-success/difficulty predictors, repeated-failure escalation, and fixed stage/model tables where applicable.</li>
               <li><b>Avengers-Pro:</b> original-request, retrained per-call, and retrained checkpoint-state variants.</li>
               <li><b>vLLM Semantic Router (session-aware):</b> a versioned, explicitly configured baseline with its tool-loop/provider-state locks, cache-aware switch cost, and resets—not an unspecified product label.</li>
+              <li><b>Fixed-prefix(K):</b> one decision after K calls, K chosen on dev as a percentile of the starting model's step count (Handoff Tax §3.2); same predictor and menu as CPR.</li>
               <li><b>ReDAct-style deferral:</b> local uncertainty/risk intervention followed by Cheap; distinguish faithful reproduction from a logit-free analogue.</li>
               <li><b>MTRouter-like outcome-aware per-call:</b> history and terminal labels, with a stay action. Equalize available state, model pool, and training budget.</li>
               <li><b>Phase 2 context policies:</b> always-full, fixed compact/retrieval packets, and independently tuned model/context selectors versus joint selection.</li>
@@ -72,7 +307,7 @@
         </div>
       </section>
       <section class="section section-light" id="oracle">
-        <div class="section-heading reveal"><span class="section-number">11</span><div>
+        <div class="section-heading reveal"><span class="section-number">13</span><div>
           <p class="kicker">Oracle and cost</p><h2>Hindsight is a diagnostic—not a deployable policy.</h2>
           <p class="section-intro">A request-level “perfect oracle” uses known candidate outcomes. Here the diagnostic chooses among only the sampled checkpoint actions under their stated continuation protocols. Report it separately by phase and action menu; a Phase 1 selector says nothing about the optimum multi-revision policy.</p>
         </div></div>
@@ -83,26 +318,36 @@
         <aside class="honesty-note reveal"><strong>Not a global upper bound</strong><p>This selector sees hindsight estimates only for the collected states and actions. It does not optimize every possible future policy, model, or context packet; finite noisy estimates may even underperform another policy. Call it a <b>sampled-branch hindsight diagnostic</b>, not a proven full-episode oracle ceiling.</p></aside>
       </section>
       <section class="section section-paper" id="feasibility">
-        <div class="section-heading reveal"><span class="section-number">12</span><div><p class="kicker">Feasibility</p><h2>Practical to pilot. Not yet justified to scale.</h2></div></div>
+        <div class="section-heading reveal"><span class="section-number">14</span><div><p class="kicker">Feasibility and gates</p><h2>Practical to pilot. Not yet justified to scale.</h2></div></div>
         <div class="feasibility-grid reveal">
           <article class="feasibility-positive"><span>A credible first experiment</span><h3>Small action space</h3><ul><li>One agent, two measured model endpoints.</li><li>A measured continuation menu before adaptive timing.</li><li>Quiescent, reproducible software sandboxes.</li><li>Small supervised predictors before complex RL.</li><li>A pilot sized to measure effect and noise before committing a larger data budget.</li></ul></article>
           <article class="feasibility-negative"><span>Not yet a credible promise</span><h3>Unbounded control</h3><ul><li>Multi-agent graphs and arbitrary model pools.</li><li>Exhaustive branching across a whole episode.</li><li>Guaranteed frontier success at lower cost.</li><li>Assumed millisecond end-to-end router latency.</li><li>A fixed dollar budget derived from an unmeasured per-rollout price.</li></ul></article>
-          <article class="cost-card"><span>Measure before budgeting</span><h3>Collection bill</h3><div class="cost-equation">prefix runs<br />+ Σ continuation trials<br />+ infrastructure<br />+ annotation / evaluation</div><p>Use pilot token/cache usage and runtimes for mean and tail estimates. Prices, model versions, repeated trials, failed branches, storage, and snapshot restoration must appear in the estimate.</p></article>
+          <article class="cost-card"><span>Measure before budgeting</span><h3>Collection bill</h3><div class="cost-equation">prefix runs<br />+ Σ continuation trials<br />+ infrastructure<br />+ annotation / evaluation</div><p>Size the full budget from M2's measured token/cache usage and runtimes, using mean and tail estimates. Prices, model versions, repeated trials, failed branches, storage, and snapshot restoration must appear in the estimate.</p></article>
         </div>
+        <div class="sub-heading reveal"><p class="kicker">Build order</p><h3>Seven milestones, each with a gate.</h3><p>No milestone starts until the one before it passes. A failed gate is reported as a finding and stops or reshapes the project.</p></div>
+        <ol class="gate-list reveal">
+          <li><span class="gate-id">M0</span><div><h4>Instrumentation</h4><p>Gateway plugin: session binding, tool-loop and provider-state locks, four-bucket usage logging, worst-case cost reservation.</p></div><div class="gate-exit"><b>Gate</b>Logged per-call cost matches the provider's billed usage on a sample of calls.</div></li>
+          <li><span class="gate-id">M1</span><div><h4>Checkpoints and snapshots</h4><p>Checkpoint hook and triggers in the harness; snapshot service with the replay-equivalence check.</p></div><div class="gate-exit"><b>Gate</b>A declared share of pilot snapshots (for example ≥ 95%) pass replay; failures are understood.</div></li>
+          <li><span class="gate-id">M2</span><div><h4>Phase 1a pilot</h4><p>Branch runner, evaluator and label store. For example 60 tasks × 3 checkpoints × 5 branches × 3 seeds = 2,700 continuations.</p></div><div class="gate-exit"><b>Gate · Test 1</b>Switch advantage varies across checkpoint states beyond trial noise. If one action always wins, ship that rule and stop.</div></li>
+          <li><span class="gate-id">M3</span><div><h4>Predictors</h4><p>Feature extractor, calibrated p̂, Ĉ and L̂, gate threshold.</p></div><div class="gate-exit"><b>Gate · Test 2</b>Better calibration and lower regret than task-only features on held-out dev repositories.</div></li>
+          <li><span class="gate-id">M4</span><div><h4>Phase 1b · timing (A4)</h4><p>Request-level, fixed-prefix, per-call and adaptive checkpoint timing on the same predictor, closed loop.</p></div><div class="gate-exit"><b>Gate · Test 3</b>The operating point holds on the test split.</div></li>
+          <li><span class="gate-id">M5</span><div><h4>Phase 2 · model × packet (D3, D4)</h4><p>COMPACT by either author, and DROP; joint selection vs the best fixed packet vs composed selectors.</p></div><div class="gate-exit"><b>Gate · novelty</b>Joint choice beats both at matched cost and success. This is the main claim.</div></li>
+          <li><span class="gate-id">M6</span><div><h4>Phase 3 · reversible control (A5)</h4><p>Switch back to Cheap, thrash control, optional small effort menu.</p></div><div class="gate-exit"><b>Gate</b>Gains beyond composed component policies after all overhead.</div></li>
+        </ol>
         <aside class="honest-answer reveal"><strong>Go / no-go decision</strong><p>Evaluate each phase on its own incremental value and its stated dependencies. Scale a learned allocation only if it generalizes and improves terminal outcomes after routing, context-transfer, or cache-loss costs. A negative recovery result does not by itself invalidate context allocation; investigate those questions without assuming the failed component helps. Prefer simple rules where they match performance, and stop expanding the action space when its added complexity is not justified.</p></aside>
       </section>
       <section class="section section-light" id="contributions">
-        <div class="section-heading reveal"><span class="section-number">13</span><div><p class="kicker">Proposed contributions</p><h2>Evidence first. Algorithmic novelty only if earned.</h2></div></div>
+        <div class="section-heading reveal"><span class="section-number">15</span><div><p class="kicker">Proposed contributions</p><h2>Evidence first. Algorithmic novelty only if earned.</h2></div></div>
         <div class="contribution-list reveal">
           <article><span>01</span><p>A phased checkpoint dataset with reproducible state restoration, model/context allocation definitions, repeated outcomes, and complete resource accounting.</p></article>
           <article><span>02</span><p>Evidence about which execution signals justify revising resource allocations, including—but not limited to—recovery, and how timing interacts with context needs.</p></article>
-          <article><span>03</span><p>A checkpoint controller evaluated against single-pass, per-call, fixed-prefix, adaptive-handoff, session-aware, and composed policies under matched phased action spaces.</p></article>
+          <article><span>03</span><p>A checkpoint controller evaluated against request-level, fixed-prefix, per-call, session-aware, best-fixed-packet and composed policies under matched phased action spaces.</p></article>
           <article><span>04</span><p>Controlled tests of model–context effects within one agent session, plus evidence for or against integrating them under a shared episode budget.</p></article>
         </div>
         <p class="reviewed">Status: research formulation. No checkpoint controller, phased checkpoint dataset, or claimed success–cost result has been implemented in this repository.</p>
       </section>
     </main>
-    <nav class="pager" aria-label="Page navigation"><a class="pager-prev" href="method.html"><small>← Previous</small><strong>Method, data and context opportunities</strong></a><a class="pager-next" href="sources.html"><small>Next →</small><strong>Sources</strong></a></nav>
+    <nav class="pager" aria-label="Page navigation"><a class="pager-prev" href="method.html"><small>← Previous</small><strong>Method, system design and data</strong></a><a class="pager-next" href="sources.html"><small>Next →</small><strong>Sources</strong></a></nav>
 
     <footer>
       <div><span class="brand-mark" aria-hidden="true">CR</span><div><strong>CheckpointRouter</strong><p>Selective routing for single-agent long-horizon sessions.</p></div></div>

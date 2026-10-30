@@ -8,9 +8,9 @@
     <meta property="og:title" content="CheckpointRouter — Long-Horizon Agent Routing" />
     <meta property="og:description" content="Selective model and context routing for a single long-horizon agent at meaningful execution checkpoints. Bounded experimental phases." />
     <meta property="og:type" content="website" />
-    <title>Method, data and context opportunities — CheckpointRouter</title>
+    <title>Method, system design and data — CheckpointRouter</title>
     <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="styles.css?v=3" />
+    <link rel="stylesheet" href="styles.css?v=4" />
     <script src="app.js?v=3" defer></script>
   </head>
   <body>
@@ -40,11 +40,11 @@
           <p class="section-intro">The phases separate timing and model/context allocation before testing their interaction, all within one agent session. They scope implementation and evidence—not the overarching research statement.</p>
         </div></div>
         <div class="phases reveal" id="phases" aria-label="Three experimental phases for single-agent sessions">
-          <article><span class="phase-tag">Phase 1 · Model control</span><h3>Checkpoint evidence + timing</h3><p>One agent, two models, fixed tools and budgets. First measure four continuations from a sampled checkpoint; then compare fixed-prefix, per-call, and adaptive one-way handoff using a matched value model.</p><p><b>Evidence:</b> continuation value, recovery/no-intervention strata, timing overhead, and terminal success–cost curves.</p></article>
+          <article><span class="phase-tag">Phase 1 · Model control</span><h3>Checkpoint evidence + timing</h3><p>One agent, two models, fixed tools and budgets. First measure five continuations from a sampled checkpoint; then compare request-level, fixed-prefix, per-call and adaptive checkpoint timing using one matched value model.</p><p><b>Evidence:</b> continuation value, recovery/no-intervention strata, timing overhead, and terminal success–cost curves.</p></article>
           <article><span class="phase-tag">Phase 2 · Context allocation</span><h3>Model × context pool</h3><p>A bounded two/three-model pool with different context capacities and two predefined full/compact packet policies. Keep reasoning settings fixed; compare fixed, independently tuned, and joint model/context assignments.</p><p><b>Evidence:</b> context sufficiency, actual token/cache use, and whether context choice changes the preferred model.</p></article>
           <article><span class="phase-tag">Phase 3 · Integrated control</span><h3>Test the coupled decisions</h3><p>Combine validated timing and model/context choices with repeated, reversible revisions inside one session, respecting tool-loop and provider-state locks. Compare a learned controller with composed component policies. Add a small reasoning-budget menu only in a separate ablation if justified.</p><p><b>Evidence:</b> interaction gains beyond components, switch frequency, reliability under session caps, and net deployment benefit.</p></article>
         </div>
-        <aside class="closest-work reveal"><strong>First executable study: Phase 1a, not the entire proposal</strong><p>One software agent, one Cheap/Strong pair, an immutable scaffold, and at most one intervention. Sample checkpoints across normal progress, planning/testing transitions, and stalled states. The four branches below make outcome collection tractable; model labels describe measured capability/cost in this setting, not universal rankings.</p></aside>
+        <aside class="closest-work reveal"><strong>First executable study: Phase 1a, not the entire proposal</strong><p>One software agent, one Cheap/Strong pair, an immutable scaffold, and at most one intervention. Sample checkpoints across normal progress, planning/testing transitions, and stalled states. The five branches below make outcome collection tractable; model labels describe measured capability/cost in this setting, not universal rankings.</p></aside>
         <div class="pipeline reveal">
           <article><span>01</span><h3>Split + run</h3><p>Partition repositories/tasks first. Collect Cheap prefixes without hidden-test feedback.</p></article><i aria-hidden="true">→</i>
           <article><span>02</span><h3>Snapshot</h3><p>Restore files, tool state, history, and the same remaining resources.</p></article><i aria-hidden="true">→</i>
@@ -52,11 +52,57 @@
           <article><span>04</span><h3>Measure</h3><p>Record terminal execution tests, spend, elapsed time, and handoff overhead.</p></article><i aria-hidden="true">→</i>
           <article><span>05</span><h3>Predict</h3><p>Calibrate small action-conditioned predictors; freeze choices before test.</p></article>
         </div>
-        <div class="branch-grid reveal" aria-label="Phase 1a: four fixed continuation protocols">
+        <figure class="diagram reveal" id="branching">
+          <p class="diagram-title"><span>FIG 3</span>How one checkpoint becomes labels</p>
+          <div class="diagram-scroll">
+          <svg viewBox="0 0 1100 430" role="img" aria-labelledby="f3t f3d">
+            <title id="f3t">Phase 1a branching from one saved checkpoint</title>
+            <desc id="f3d">A Cheap prefix runs from the task start to checkpoint t, where a snapshot is saved. From the restored snapshot, five continuations run to the end: A continue Cheap, B Strong with full history, C Strong with a compact packet, D Strong with no trajectory, E Strong restart from the original sandbox. Each runs k times with different seeds. Hidden tests then give success Y, and the ledger gives remaining cost and time, which form one label row per trial.</desc>
+            <defs><marker id="ah3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#111714"/></marker></defs>
+            <rect class="d-box" x="20" y="185" width="110" height="56" rx="10"/><text class="d-title" x="75" y="210">Task start</text><text class="d-sub" x="75" y="228">original repo</text>
+            <line class="d-arrow" x1="130" y1="213" x2="268" y2="213" marker-end="url(#ah3)"/>
+            <text class="d-label" x="200" y="203">Cheap prefix</text><text class="d-label" x="200" y="233">sunk cost, kept</text>
+            <circle class="d-node" cx="300" cy="213" r="30"/><text class="d-small" x="300" y="218">t</text>
+            <text class="d-small" x="300" y="268">checkpoint</text><text class="d-sub" x="300" y="285">snapshot saved</text>
+            <text class="d-sub" x="300" y="301">replay-checked</text>
+
+            <g>
+              <path class="d-arrow" d="M330 213 C380 213 380 50 430 50" marker-end="url(#ah3)"/>
+              <path class="d-arrow" d="M330 213 C380 213 380 130 430 130" marker-end="url(#ah3)"/>
+              <path class="d-arrow" d="M330 213 L430 213" marker-end="url(#ah3)"/>
+              <path class="d-arrow" d="M330 213 C380 213 380 296 430 296" marker-end="url(#ah3)"/>
+              <path class="d-arrow d-return" d="M330 213 C380 213 380 376 430 376" marker-end="url(#ah3)"/>
+            </g>
+            <rect class="d-box" x="432" y="26" width="300" height="48" rx="10"/><text class="d-title d-left" x="448" y="47">A · Continue Cheap</text><text class="d-sub d-left" x="448" y="64">control: same model, full history</text>
+            <rect class="d-new" x="432" y="106" width="300" height="48" rx="10"/><text class="d-title d-left" x="448" y="127">B · Strong + FULL</text><text class="d-sub d-left" x="448" y="144">whole trajectory verbatim</text>
+            <rect class="d-new" x="432" y="189" width="300" height="48" rx="10"/><text class="d-title d-left" x="448" y="210">C · Strong + COMPACT</text><text class="d-sub d-left" x="448" y="227">token-capped structured summary</text>
+            <rect class="d-new" x="432" y="272" width="300" height="48" rx="10"/><text class="d-title d-left" x="448" y="293">D · Strong + DROP</text><text class="d-sub d-left" x="448" y="310">workspace kept, trajectory dropped</text>
+            <rect class="d-warn" x="432" y="352" width="300" height="48" rx="10"/><text class="d-title d-left" x="448" y="373">E · Strong RESTART</text><text class="d-sub d-left" x="448" y="390">original sandbox, residual budget</text>
+
+            <text class="d-small" x="785" y="18">run to end · × k seeds</text>
+            <g>
+              <line class="d-arrow" x1="732" y1="50" x2="838" y2="50" marker-end="url(#ah3)"/>
+              <line class="d-arrow" x1="732" y1="130" x2="838" y2="130" marker-end="url(#ah3)"/>
+              <line class="d-arrow" x1="732" y1="213" x2="838" y2="213" marker-end="url(#ah3)"/>
+              <line class="d-arrow" x1="732" y1="296" x2="838" y2="296" marker-end="url(#ah3)"/>
+              <line class="d-arrow" x1="732" y1="376" x2="838" y2="376" marker-end="url(#ah3)"/>
+            </g>
+            <rect class="d-box" x="840" y="26" width="240" height="374" rx="12"/>
+            <text class="d-title" x="960" y="120">Hidden tests</text><text class="d-sub" x="960" y="140">→ Y ∈ {0, 1}</text>
+            <text class="d-title" x="960" y="200">Usage ledger</text><text class="d-sub" x="960" y="220">→ C<tspan dy="-5" font-size="9">rem</tspan><tspan dy="5">, L</tspan><tspan dy="-5" font-size="9">rem</tspan><tspan dy="5">, overhead</tspan></text>
+            <line class="d-grid" x1="864" y1="250" x2="1056" y2="250"/>
+            <text class="d-small" x="960" y="282">one label row</text><text class="d-small" x="960" y="300">per trial</text>
+            <text class="d-sub" x="960" y="330">Q̂ and Δ̂ are fitted</text><text class="d-sub" x="960" y="346">from these rows</text>
+          </svg>
+          </div>
+          <figcaption>All five branches start from the <b>same restored state</b> with the <b>same remaining budget</b>, so their outcomes can be compared directly (rubric E2). B–D map onto the Handoff Tax's Raw, Compact and Traj-drop interfaces. RESTART (dashed) discards the edits; its prefix cost stays sunk.</figcaption>
+        </figure>
+        <div class="branch-grid reveal" aria-label="Phase 1a: five fixed continuation protocols">
           <article><span class="phase-tag">A · Control</span><h3>Continue Cheap</h3><p>Keep the same workspace and full allowable history. Cheap runs to termination; no later escalation in the single-checkpoint experiment.</p></article>
           <article><span class="phase-tag">B · In-place continuation</span><h3>Strong + full history</h3><p>Restore the checkpoint. Strong receives the full permitted history and completes the task without further routing.</p></article>
           <article><span class="phase-tag">C · Context intervention</span><h3>Strong + compact handoff</h3><p>Use the same workspace, but a fixed, token-capped packet: goal, current diff, visible failures, constraints, attempted fixes, and evidence references. Charge packet construction and verification.</p></article>
-          <article><span class="phase-tag">D · Clean restart</span><h3>Strong + initial task</h3><p>Restore the original sandbox, not the edited checkpoint. Give the original task only. Prefix spend and elapsed time remain sunk; restart receives the residual budget, not a fresh episode.</p></article>
+          <article><span class="phase-tag">D · Trajectory drop</span><h3>Strong + workspace only</h3><p>Keep the edited workspace but give Strong only the task and a short “continue from the current files” note. The Handoff Tax found this the best escalation interface, so it is a branch, not an afterthought.</p></article>
+          <article><span class="phase-tag">E · Clean restart</span><h3>Strong + initial task</h3><p>Restore the original sandbox, not the edited checkpoint. Give the original task only. Prefix spend and elapsed time remain sunk; restart receives the residual budget, not a fresh episode.</p></article>
         </div>
         <div class="protocol-grid reveal">
           <article><h3>What a snapshot must preserve</h3><p>Base commit and workspace changes; container/dependency state; working directory and relevant shell/tool state; tool outputs and agent messages; random/configuration metadata; elapsed time and remaining spend/turn/tool limits. Snapshot only at quiescent tool boundaries. Test replay equivalence before trusting comparisons.</p><p>If a process or external service cannot be cloned consistently, restrict or document it. Do not silently call a message transcript a restorable environment.</p></article>
@@ -66,8 +112,190 @@
         </div>
 
       </section>
-      <section class="section section-paper" id="data">
+      <section class="section section-light" id="system-design">
         <div class="section-heading reveal"><span class="section-number">08</span><div>
+          <p class="kicker">System design</p><h2>Three planes, one decision interface.</h2>
+          <p class="section-intro">CheckpointRouter has three parts. The <b>online plane</b> runs one agent episode and makes stay/switch decisions. The <b>offline plane</b> branches saved checkpoints to produce training labels. The <b>evaluation plane</b> runs every policy on held-out tasks. CPR and every baseline sit behind the same <code>decide()</code> call, so comparisons are matched by construction.</p>
+        </div></div>
+
+        <figure class="diagram reveal" id="architecture">
+          <p class="diagram-title"><span>FIG 1</span>Architecture</p>
+          <div class="diagram-scroll">
+          <svg viewBox="0 0 1100 640" role="img" aria-labelledby="f1t f1d">
+            <title id="f1t">CheckpointRouter architecture</title>
+            <desc id="f1d">Online plane: the agent harness exchanges tool calls with a Docker task sandbox and sends model calls through the LiteLLM gateway with a CPR plugin, which forwards them to the active Cheap or Strong model and logs usage to a Postgres ledger. At checkpoints the harness asks the CPR controller to decide; the controller reads session state from Redis. Offline plane: prefix runs, snapshots, branch runner, hidden-test evaluator, label store, trainer and policy registry, which deploys a frozen policy to the controller. Evaluation plane: a closed-loop runner, paired statistics and a decision report.</desc>
+            <defs><marker id="ah1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#111714"/></marker></defs>
+
+            <rect class="d-lane" x="10" y="10" width="1080" height="272" rx="14"/>
+            <text class="d-lane-label" x="28" y="36">ONLINE · ONE AGENT EPISODE</text>
+            <rect class="d-box" x="30" y="60" width="180" height="74" rx="10"/>
+            <text class="d-title" x="120" y="92">Task sandbox</text><text class="d-sub" x="120" y="112">Docker · repo · hidden tests</text>
+            <rect class="d-new" x="270" y="60" width="200" height="74" rx="10"/>
+            <text class="d-title" x="370" y="92">Agent harness</text><text class="d-sub" x="370" y="112">agent loop + checkpoint hook</text>
+            <rect class="d-new" x="540" y="60" width="210" height="74" rx="10"/>
+            <text class="d-title" x="645" y="92">LiteLLM gateway</text><text class="d-sub" x="645" y="112">+ CPR plugin</text>
+            <rect class="d-box" x="830" y="48" width="240" height="44" rx="10"/>
+            <text class="d-title" x="950" y="75">Cheap model</text>
+            <rect class="d-box" x="830" y="104" width="240" height="44" rx="10"/>
+            <text class="d-title" x="950" y="131">Strong model</text>
+            <rect class="d-new" x="270" y="190" width="200" height="74" rx="10"/>
+            <text class="d-title" x="370" y="222">CPR controller</text><text class="d-sub" x="370" y="242">features → menu → Q̂ → gate</text>
+            <rect class="d-box" x="540" y="190" width="210" height="74" rx="10"/>
+            <text class="d-title" x="645" y="222">Session store</text><text class="d-sub" x="645" y="242">Redis: active model, r_t, cache</text>
+            <rect class="d-box" x="830" y="190" width="240" height="74" rx="10"/>
+            <text class="d-title" x="950" y="222">Usage ledger</text><text class="d-sub" x="950" y="242">Postgres: tokens, $, latency per call</text>
+
+            <line class="d-arrow" x1="210" y1="86" x2="268" y2="86" marker-end="url(#ah1)"/>
+            <line class="d-arrow d-return" x1="270" y1="110" x2="212" y2="110" marker-end="url(#ah1)"/>
+            <text class="d-label" x="240" y="78">tool I/O</text>
+            <line class="d-arrow" x1="470" y1="86" x2="538" y2="86" marker-end="url(#ah1)"/>
+            <line class="d-arrow d-return" x1="540" y1="110" x2="472" y2="110" marker-end="url(#ah1)"/>
+            <text class="d-label" x="505" y="78">messages</text>
+            <line class="d-arrow" x1="750" y1="86" x2="828" y2="72" marker-end="url(#ah1)"/>
+            <line class="d-arrow" x1="750" y1="110" x2="828" y2="124" marker-end="url(#ah1)"/>
+            <line class="d-arrow" x1="350" y1="134" x2="350" y2="188" marker-end="url(#ah1)"/>
+            <text class="d-label d-end" x="342" y="166">decide()</text>
+            <line class="d-arrow d-return" x1="390" y1="190" x2="390" y2="136" marker-end="url(#ah1)"/>
+            <text class="d-label d-left" x="398" y="166">hold | (m, κ)</text>
+            <line class="d-arrow" x1="472" y1="227" x2="538" y2="227" marker-start="url(#ah1)" marker-end="url(#ah1)"/>
+            <text class="d-label" x="505" y="219">read</text>
+            <line class="d-arrow" x1="645" y1="136" x2="645" y2="188" marker-start="url(#ah1)" marker-end="url(#ah1)"/>
+            <text class="d-label d-left" x="653" y="166">bind · locks</text>
+            <path class="d-arrow" d="M735 134 L735 166 L950 166 L950 188" marker-end="url(#ah1)"/>
+            <text class="d-label" x="860" y="160">4-bucket usage</text>
+
+            <rect class="d-lane" x="10" y="300" width="1080" height="196" rx="14"/>
+            <text class="d-lane-label" x="28" y="326">OFFLINE · LABEL FACTORY</text>
+            <rect class="d-box" x="26" y="352" width="130" height="84" rx="10"/>
+            <text class="d-title" x="91" y="384">Prefix runs</text><text class="d-sub" x="91" y="404">always-Cheap</text><text class="d-sub" x="91" y="420">no hidden tests</text>
+            <rect class="d-new" x="181" y="352" width="130" height="84" rx="10"/>
+            <text class="d-title" x="246" y="384">Snapshots</text><text class="d-sub" x="246" y="404">image + diff +</text><text class="d-sub" x="246" y="420">history + r_t</text>
+            <rect class="d-new" x="336" y="352" width="130" height="84" rx="10"/>
+            <text class="d-title" x="401" y="384">Branch runner</text><text class="d-sub" x="401" y="404">snapshot × action</text><text class="d-sub" x="401" y="420">× seed, N workers</text>
+            <rect class="d-box" x="491" y="352" width="130" height="84" rx="10"/>
+            <text class="d-title" x="556" y="384">Evaluator</text><text class="d-sub" x="556" y="404">hidden tests</text><text class="d-sub" x="556" y="420">→ Y ∈ {0, 1}</text>
+            <rect class="d-new" x="646" y="352" width="130" height="84" rx="10"/>
+            <text class="d-title" x="711" y="384">Label store</text><text class="d-sub" x="711" y="404">one row per trial</text><text class="d-sub" x="711" y="420">Y, tokens, $, time</text>
+            <rect class="d-new" x="801" y="352" width="130" height="84" rx="10"/>
+            <text class="d-title" x="866" y="384">Trainer</text><text class="d-sub" x="866" y="404">calibrated p̂,</text><text class="d-sub" x="866" y="420">Ĉ, L̂ per action</text>
+            <rect class="d-new" x="956" y="352" width="118" height="84" rx="10"/>
+            <text class="d-title" x="1015" y="384">Registry</text><text class="d-sub" x="1015" y="404">frozen, hashed</text><text class="d-sub" x="1015" y="420">policy versions</text>
+            <line class="d-arrow" x1="156" y1="394" x2="179" y2="394" marker-end="url(#ah1)"/>
+            <line class="d-arrow" x1="311" y1="394" x2="334" y2="394" marker-end="url(#ah1)"/>
+            <line class="d-arrow" x1="466" y1="394" x2="489" y2="394" marker-end="url(#ah1)"/>
+            <line class="d-arrow" x1="621" y1="394" x2="644" y2="394" marker-end="url(#ah1)"/>
+            <line class="d-arrow" x1="776" y1="394" x2="799" y2="394" marker-end="url(#ah1)"/>
+            <line class="d-arrow" x1="931" y1="394" x2="954" y2="394" marker-end="url(#ah1)"/>
+            <path class="d-arrow d-return" d="M150 134 L150 291 L246 291 L246 350" marker-end="url(#ah1)"/>
+            <text class="d-label d-left" x="158" y="205">snapshot</text><text class="d-label d-left" x="158" y="221">at checkpoint</text>
+            <path class="d-arrow" d="M1015 352 L1015 291 L370 291 L370 266" marker-end="url(#ah1)"/>
+            <text class="d-label" x="700" y="295">deploy frozen policy</text>
+
+            <rect class="d-lane" x="10" y="514" width="1080" height="116" rx="14"/>
+            <text class="d-lane-label" x="28" y="540">EVALUATION · HELD-OUT TEST SPLIT</text>
+            <rect class="d-new" x="30" y="552" width="330" height="62" rx="10"/>
+            <text class="d-title" x="195" y="578">Closed-loop runner</text><text class="d-sub" x="195" y="598">CPR + baselines, same decide() API</text>
+            <rect class="d-box" x="420" y="552" width="300" height="62" rx="10"/>
+            <text class="d-title" x="570" y="578">Paired statistics</text><text class="d-sub" x="570" y="598">pass^k · repo-clustered bootstrap CIs</text>
+            <rect class="d-box" x="780" y="552" width="290" height="62" rx="10"/>
+            <text class="d-title" x="925" y="578">Decision report</text><text class="d-sub" x="925" y="598">operating point · cost · switches</text>
+            <line class="d-arrow" x1="360" y1="583" x2="418" y2="583" marker-end="url(#ah1)"/>
+            <line class="d-arrow" x1="720" y1="583" x2="778" y2="583" marker-end="url(#ah1)"/>
+            <path class="d-arrow d-return" d="M1015 436 L1015 506 L340 506 L340 550" marker-end="url(#ah1)"/>
+            <text class="d-label" x="600" y="510">same frozen policies</text>
+          </svg>
+          </div>
+          <figcaption><span class="swatch swatch-new"></span>to be built for CPR <span class="swatch swatch-old"></span>existing or off-the-shelf. Solid arrows are calls; dashed arrows are replies or data hand-offs. The gateway is the only path to a model, so every policy pays for tokens the same way.</figcaption>
+        </figure>
+
+        <div class="sub-heading reveal"><p class="kicker">Who owns what</p><h3>Each job has exactly one owner.</h3>
+          <p>The split follows what each piece can see. Only the harness controls the sandbox. Only the gateway sees billed tokens and tool-loop state. The controller is a pure function of features, so it can be swapped for any baseline.</p></div>
+        <div class="component-grid reveal">
+          <article class="is-new"><span>New · gateway</span><h3>CPR gateway plugin</h3><p>LiteLLM pre- and post-call hooks.</p><ul><li>Maps <code>model: "cpr"</code> + a session header to the session's active model.</li><li>Blocks a switch while a tool call is unanswered or the provider holds state (B1).</li><li>Logs fresh, cache-read, cache-write and output tokens, and $ per call (B2, B4).</li><li>Reserves worst-case cost before dispatch and rejects calls over the cap.</li></ul><small>Runs on the LiteLLM, Redis and Postgres already in this repo.</small></article>
+          <article class="is-new"><span>New · harness</span><h3>Checkpoint hook</h3><p>Inside the agent loop, after all tool results return.</p><ul><li>Triggers: a test or build result; the same error 3× in 6 calls; first edit after exploring; a plan written; every k calls.</li><li>Calls <code>decide()</code>, then applies the answer: rebind the model, build the packet, or reset the sandbox.</li></ul><small>Harness: a minimal SWE-bench agent (for example mini-swe-agent).</small></article>
+          <article class="is-new"><span>New · offline</span><h3>Snapshot service</h3><p>Makes a checkpoint restorable.</p><ul><li>Saves <code>docker commit</code> image, git diff, cwd and env, message log, r<sub>t</sub>, config and seed.</li><li>Replay check: restore, re-run the last tool calls, compare outputs and diff hash.</li><li>Snapshots that fail are excluded, not patched. Live processes are not captured.</li></ul></article>
+          <article class="is-new"><span>New · offline</span><h3>Branch runner + evaluator</h3><p>Turns one snapshot into labelled outcomes.</p><ul><li>One job = snapshot × action × seed, in a fresh container with the residual budget.</li><li>Hidden tests run only after the branch ends and give Y.</li><li>Parallel workers, limited by Docker memory and provider rate limits.</li></ul></article>
+          <article class="is-new"><span>New · decision</span><h3>CPR controller</h3><p>Stateless scorer, trained offline and frozen.</p><ul><li>Features: test status, error repeats, edits, steps, context fill, cache warmth, lock, active model, steps since switch, r<sub>t</sub>, plus a frozen history embedding.</li><li>Menu F: allowed models × packets that fit the window and the remaining budget.</li><li>Q̂<sub>a</sub> = p̂<sub>a</sub> − λĈ<sub>a</sub> − ηL̂<sub>a</sub>; revise if the best Δ̂ exceeds τ.</li></ul></article>
+          <article class="is-reused"><span>Reused</span><h3>Existing stack</h3><p>Already in this repository.</p><ul><li>LiteLLM proxy, Postgres and Redis (<code>docker-compose.yml</code>).</li><li>Ollama for pipeline development on a laptop.</li><li>Harbor / Terminal-Bench runner.</li><li>LLMRouterBench Avengers-Pro baseline.</li></ul><small>None of these train or evaluate the checkpoint controller on their own.</small></article>
+        </div>
+
+        <figure class="diagram reveal" id="decision-sequence">
+          <p class="diagram-title"><span>FIG 2</span>One checkpoint, step by step</p>
+          <div class="diagram-scroll">
+          <svg viewBox="0 0 1100 580" role="img" aria-labelledby="f2t f2d">
+            <title id="f2t">Sequence of one checkpoint decision</title>
+            <desc id="f2d">The harness sends call i through the gateway to the Cheap model. The reply asks for a tool; the harness runs tests in the sandbox, which report three failures. All tool results are back, so this is a quiescent boundary. A test-result trigger fires; the harness asks the controller to decide. The controller reads session state: no lock, warm cache, 1.20 dollars left. It scores the menu and returns Strong with a compact packet. The harness builds the packet and sends call i+1, which the gateway routes to Strong, charging a cold cache write.</desc>
+            <defs><marker id="ah2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#111714"/></marker></defs>
+            <rect class="d-box" x="20" y="12" width="180" height="46" rx="10"/><text class="d-title" x="110" y="41">Task sandbox</text>
+            <rect class="d-new" x="240" y="12" width="180" height="46" rx="10"/><text class="d-title" x="330" y="41">Agent harness</text>
+            <rect class="d-new" x="470" y="12" width="180" height="46" rx="10"/><text class="d-title" x="560" y="41">CPR controller</text>
+            <rect class="d-new" x="700" y="12" width="180" height="46" rx="10"/><text class="d-title" x="790" y="41">Gateway + plugin</text>
+            <rect class="d-box" x="910" y="12" width="180" height="46" rx="10"/><text class="d-title" x="1000" y="41">Cheap / Strong</text>
+            <line class="d-life" x1="110" y1="58" x2="110" y2="570"/><line class="d-life" x1="330" y1="58" x2="330" y2="570"/><line class="d-life" x1="560" y1="58" x2="560" y2="570"/><line class="d-life" x1="790" y1="58" x2="790" y2="570"/><line class="d-life" x1="1000" y1="58" x2="1000" y2="570"/>
+
+            <line class="d-arrow" x1="330" y1="90" x2="788" y2="90" marker-end="url(#ah2)"/><text class="d-label" x="560" y="83">1  call i  (model: cpr, session S)</text>
+            <line class="d-arrow" x1="790" y1="122" x2="998" y2="122" marker-end="url(#ah2)"/><text class="d-label" x="895" y="115">2  forward to active: Cheap</text>
+            <line class="d-arrow d-return" x1="1000" y1="154" x2="792" y2="154" marker-end="url(#ah2)"/><text class="d-label" x="895" y="147">3  reply: run tests · usage</text>
+            <line class="d-arrow d-return" x1="790" y1="186" x2="332" y2="186" marker-end="url(#ah2)"/><text class="d-label" x="560" y="179">4  reply  (plugin logs 4-bucket cost)</text>
+            <line class="d-arrow" x1="330" y1="218" x2="112" y2="218" marker-end="url(#ah2)"/><text class="d-label" x="220" y="211">5  run pytest</text>
+            <line class="d-arrow d-return" x1="110" y1="250" x2="328" y2="250" marker-end="url(#ah2)"/><text class="d-label" x="220" y="243">6  3 tests fail</text>
+
+            <rect x="20" y="266" width="1070" height="28" rx="6" fill="#f4ffdf" stroke="#8fbe36"/>
+            <text class="d-small" x="555" y="285">QUIESCENT BOUNDARY · all tool results returned · switching and snapshots allowed</text>
+
+            <rect class="d-box" x="240" y="306" width="180" height="28" rx="6"/><text class="d-small" x="330" y="325">7  trigger: test result</text>
+            <line class="d-arrow" x1="330" y1="356" x2="558" y2="356" marker-end="url(#ah2)"/><text class="d-label" x="445" y="349">8  decide(H_t, r_t)</text>
+            <line class="d-arrow" x1="560" y1="388" x2="788" y2="388" marker-end="url(#ah2)"/><text class="d-label" x="675" y="381">9  read session state</text>
+            <line class="d-arrow d-return" x1="790" y1="420" x2="562" y2="420" marker-end="url(#ah2)"/><text class="d-label" x="675" y="413">10  no lock · cache warm · $1.20 left</text>
+            <rect class="d-new" x="460" y="434" width="200" height="28" rx="6"/><text class="d-small" x="560" y="453">11  score F → revise</text>
+            <line class="d-arrow d-return" x1="560" y1="486" x2="332" y2="486" marker-end="url(#ah2)"/><text class="d-label" x="445" y="479">12  (Strong, COMPACT)</text>
+            <line class="d-arrow" x1="330" y1="518" x2="788" y2="518" marker-end="url(#ah2)"/><text class="d-label" x="560" y="511">13  build packet · call i+1</text>
+            <line class="d-arrow" x1="790" y1="550" x2="998" y2="550" marker-end="url(#ah2)"/><text class="d-label" x="895" y="543">14  Strong · cold cache write</text>
+          </svg>
+          </div>
+          <figcaption>Steps 1–6 are an ordinary agent turn; the plugin only binds and logs. A decision can happen only inside the green band. If the last reply had an unanswered tool call (a <b>tool-loop lock</b>), step 10 would report the lock and the controller could only hold. Example values are illustrative.</figcaption>
+        </figure>
+
+        <div class="sub-heading reveal"><p class="kicker">Interface</p><h3>One call for every policy.</h3>
+          <p>CPR, the fixed-prefix rule, the per-call router, SAAR and every other baseline implement the same method. They see the same state and choose from the same menu, so differences come from the policy, not from the plumbing.</p></div>
+        <pre class="api-block reveal"><code>decide(state) → HOLD | Allocation(model, packet, budget)
+
+state  = CheckpointState(
+           features   x_t,        # φ(H_t, r_t): visible evidence only, never hidden tests
+           menu       F,          # feasible (model, packet) pairs; always contains HOLD
+           active     (m, κ),     # current model and packet
+           remaining  r_t)        # spend, deadline, turn and tool caps
+packet ∈ {FULL, COMPACT, DROP, RESTART}       budget fixed in v1</code></pre>
+
+        <div class="sub-heading reveal"><p class="kicker">Data model</p><h3>Every trial is kept, including failures.</h3></div>
+        <div class="table-wrap reveal"><table class="research-table is-compact">
+          <thead><tr><th scope="col">Table</th><th scope="col">One row per</th><th scope="col">Key fields</th></tr></thead>
+          <tbody>
+            <tr><th scope="row"><code>tasks</code></th><td>task</td><td>id, repository, split (train / dev / test, fixed before collection), environment fingerprint</td></tr>
+            <tr><th scope="row"><code>episodes</code></th><td>prefix run or test run</td><td>task, policy version, model pair, price-card version, seed, Y, total C and L</td></tr>
+            <tr><th scope="row"><code>checkpoints</code></th><td>checkpoint</td><td>episode, step, trigger, feature version, snapshot reference, replay-check result, sampling weight</td></tr>
+            <tr><th scope="row"><code>branches</code></th><td>checkpoint × action</td><td>action (model, packet), continuation protocol μ</td></tr>
+            <tr><th scope="row"><code>trials</code></th><td>stochastic repeat</td><td>branch, seed, Y, fresh / cache-read / cache-write / output tokens, C<sup>rem</sup>, L<sup>rem</sup>, handoff overhead, cache state</td></tr>
+            <tr><th scope="row"><code>calls</code></th><td>model call</td><td>session, model, packet, four token buckets, $, latency, lock state (written by the gateway plugin)</td></tr>
+          </tbody>
+        </table></div>
+
+        <div class="sub-heading reveal"><p class="kicker">Design decisions</p><h3>Defaults, and why.</h3><p>Each can change, but each must be fixed before label collection starts.</p></div>
+        <div class="table-wrap reveal"><table class="research-table is-compact">
+          <thead><tr><th scope="col">Decision</th><th scope="col">Default</th><th scope="col">Why</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">First benchmark</th><td>SWE-bench Verified; Terminal-Bench second</td><td>Hidden tests give Y. The workspace is mostly a git diff, so snapshots restore reliably. The Handoff Tax uses it, so results compare directly.</td></tr>
+            <tr><th scope="row">Model pair</th><td>One Cheap/Strong API pair with prompt caching, pinned before collection. The local Ollama pair is for pipeline development only.</td><td>The local 7B/8B pair has no real capability gap and reports no cache tokens, so it cannot measure gap recovered or cache cost.</td></tr>
+            <tr><th scope="row">Where decisions run</th><td>In the harness; all model traffic through the gateway</td><td>Only the harness can snapshot, reset or rewrite the sandbox. Only the gateway sees billed tokens and tool-loop state.</td></tr>
+            <tr><th scope="row">Snapshot method</th><td><code>docker commit</code> + git diff + message log + r<sub>t</sub></td><td>Simple and checkable. Tasks that need live background services are excluded or documented.</td></tr>
+            <tr><th scope="row">Cost of repeated trials</th><td>Store raw token counts; recompute cost under the cache state a real deployment would see</td><td>Repeated branches from one snapshot hit a warm provider cache and would look too cheap. Billed cost is reported alongside.</td></tr>
+            <tr><th scope="row">Learner</th><td>Calibrated logistic or gradient-boosted predictors; no RL in v1</td><td>The data is small and calibration matters more than capacity. RL is justified only if Phase 1 shows the value exists.</td></tr>
+          </tbody>
+        </table></div>
+        <aside class="closest-work reveal"><strong>Build order and gates</strong><p>The system is built in seven milestones (M0–M6), each with a go/no-go gate. Instrumentation and snapshots come before any learning. See <a href="evaluation.html#feasibility">Feasibility and gates</a>.</p></aside>
+      </section>
+      <section class="section section-paper" id="data">
+        <div class="section-heading reveal"><span class="section-number">09</span><div>
           <p class="kicker">Data</p><h2>Existing tasks and traces help. Checkpoint outcomes still need collection.</h2>
           <p class="section-intro">Use public resources as task, trajectory, or baseline inputs—not as interchangeable sources of alternative-allocation outcomes. Start with Phase 1 continuations; extend the schema for model/context assignments in later phases.</p>
         </div></div>
@@ -85,7 +313,7 @@
         <aside class="data-caveat reveal"><b>Proposed new record:</b> task/repository split, immutable environment fingerprint, checkpoint observations, restoration instructions, remaining resources, action/handoff definition, model/configuration version, and every continuation’s outcome, usage, timing, and seed. Later phases add context packets/capacities, cache state, and the sequence of revisions within the session. Release only redistributable, sanitized artifacts; inspect code, logs, and credentials before publication. Preserve failed and no-rescue cases.</aside>
       </section>
       <section class="section section-accent" id="opportunity">
-        <div class="section-heading reveal"><span class="section-number">09</span><div>
+        <div class="section-heading reveal"><span class="section-number">10</span><div>
           <p class="kicker">Core opportunity: model × context pools</p><h2>Match resources to the session as it evolves.</h2>
           <p class="section-intro">Context allocation for the single agent is the central opportunity, scoped in Phases 2–3. Routed handoffs and session-aware routers are grounding and comparators—not capabilities to claim as new.</p>
         </div></div>
