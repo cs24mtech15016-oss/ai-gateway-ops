@@ -48,6 +48,11 @@
               <p><b class="literature-label">Role in our study</b>Compare original-request, retrained per-call, and retrained checkpoint-state variants. Match tasks, pool, scaffold, and total budget; isolate gains from representation, labels, or extra data from gains attributed to decision timing.</p>
             </div>
             <div class="literature-entry">
+              <div class="literature-work"><h4><a href="https://openreview.net/forum?id=0GdLxaSjtZ" target="_blank" rel="noreferrer">LongContextRouter</a></h4><small>Task-level router for agents · ICLR 2027 submission · §§3–5</small></div>
+              <p><b class="literature-label">Established contribution</b>Picks one model per agent task before execution from a hierarchical encoding of long task inputs (overlapping windows + causal Transformer), with a success head and a separate cost head (U<sub>m</sub> = π̂<sub>m</sub> − λφ(ĉ<sub>m</sub>)). On SWE-bench Pro, history text is used only in training; at test it sees the problem statement only. Five-model pool, four benchmarks, one split.</p>
+              <p><b class="literature-label">Role in our study</b>Closest request-level baseline for agent tasks, and evidence that execution history helps a router. It never decides mid-run and never chooses what context the agent receives, so it does not cover D3/D4. Its future work asks for “step-level routing” with “richer decision-time histories”, which is CPR’s setting.</p>
+            </div>
+            <div class="literature-entry">
               <div class="literature-work"><h4><a href="https://arxiv.org/abs/2406.18665" target="_blank" rel="noreferrer">RouteLLM</a> · <a href="https://arxiv.org/abs/2508.21141" target="_blank" rel="noreferrer">PILOT</a></h4><small>Preference / bandit routers</small></div>
               <p><b class="literature-label">Established contribution</b>RouteLLM learns a strong/weak preference trade-off; PILOT learns from contextual-bandit feedback. Their original decision unit is an incoming request.</p>
               <p><b class="literature-label">Role in our study</b>Ground economical model selection and chosen-action feedback. Reusing these ideas at checkpoints requires state and outcome supervision appropriate to the remaining episode; it is an adaptation, not proof that request routers cannot be extended.</p>

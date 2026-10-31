@@ -38,6 +38,16 @@ partly model-assisted; quote the paper section or file, not this table, when cit
 
 Dropped for v1 (multi-agent only): ProgRouter, MasRouter, CASTER.
 
+Read but not a column (request-level, already covered by RL/AvP): **LongContextRouter**
+(OpenReview 0GdLxaSjtZ, ICLR 2027 submission). It picks one model per task "using information
+available before task execution" (§3) from a hierarchical encoding of long task inputs, with a
+learned success head and a separate cost head, `U_m = π̂_m − λ·φ(ĉ_m)` (Eq. 12). On SWE-bench Pro the
+history text C is used only in training; test input is the problem statement only (Eq. 2), and labels
+are full-task success from the start, "not continuation from C" (§3). One split, no seeds (§5.5).
+Its future work asks for "richer decision-time histories and step-level routing" (§6). Rubric scores:
+A1 · (one choice per task), D1 ✅, D3/D4 · (the packet is not a decision), C1 ✅, E1 ✅ (SWE-bench
+Pro, MemoryAgentBench), E2 ·, E3 ·, E4 ◐ (any-success oracle).
+
 Dropped as not close matches (one-way escalation only; they never return to the cheap model):
 TACIT-Switch (arXiv 2608.27911, permanent handoff, §2.1 and Algorithm 1), SWE-Router
 (arXiv 2607.00053, one continue-or-restart decision, Algorithm 1) and Bayesian Self-Escalation
@@ -61,7 +71,7 @@ searches turned up nothing; it does not prove no code exists.
 | ACON | github.com/microsoft/acon (`d63f9ae`) | C1, D3, E1, E3 |
 | TRC | github.com/nokia-applied-research/Trace (`9be7d66`) | C1, E2, E3 |
 | TWN | github.com/CommonstackAI/TwinRouterBench (`466fb0b`) | A5, B1, B2, D2, D3, E2, E3, E4 |
-| ReD, SEQ, ARES, TAB, PAIR, HT | Not found | None; paper only |
+| ReD, SEQ, ARES, TAB, PAIR, HT, LongContextRouter | Not found | None; paper only |
 
 **Consequence for CPR:** the cells that matter most for the novelty claim, HT's A4, D3 and D4,
 come from a paper with no public code, so they cannot be reproduced yet.
@@ -184,10 +194,10 @@ and beat HT's best fixed interface at matched cost.
 
 ## Open verification items
 
-- [ ] LongContextRouter (openreview.net/forum?id=0GdLxaSjtZ): the title overlaps CPR and the content
-      has not been read. Re-tried 2026-10-31: the forum page, PDF and API all return OpenReview's
-      browser challenge (403); no arXiv or Crossref copy found. Needs a manual download. Read it before
-      claiming D3/D4.
+- [x] LongContextRouter (openreview.net/forum?id=0GdLxaSjtZ, ICLR 2027 submission, read 2026-10-31):
+      one model per task chosen before execution (§3, §4), so it is a request-level router over long
+      task inputs. It does not choose context (D3/D4 absent); "context" is the router's own input.
+      D3/D4 claims stand. Not added as a column; listed under Code availability as not found.
 - [ ] HT E2: do the interfaces share one prefix run per task and switch point? No public code, so
       this can only be settled by the paper's appendix or by asking the authors.
 - [ ] PAIR E1 and C1: benchmarks and outcome definition (abstract only so far; no public code).
