@@ -102,6 +102,8 @@ data and caps. Only *when* the decision can fire differs.
 | **Replay-equivalence check** | Restore the snapshot and re-run the same action with a fixed seed where the backend supports it. The tool outputs and the diff must match the original. A snapshot that fails this check is excluded, not patched. |
 | **Branch** | One continuation from a restored snapshot under action `a` and protocol `μ_a`. Several stochastic trials per branch. |
 | **Continuation value** | `Q_a(H_t, r_t; μ_a) = E[Y_a − λ·C_a^rem − η·L_a^rem]`, where the remaining cost and time include `a`'s handoff overhead. |
+| **Gate rule** | `gate = revise` iff `max_{a ∈ F∖{hold}} Δ̂_a > τ`, with `τ ≥ 0` tuned on dev; then `a_t = argmax Δ̂_a`. |
+| **Weights λ, η** | Ratios of Lagrange multipliers for the constrained objective (§7): `λ = 1/ν`, `η = ρ/ν`. Swept on dev; the operating point is the cheapest sweep point that meets both constraints. |
 | **Switch advantage** | `Δ_a = Q_a − Q_hold`. Phase 1a uses Cheap-to-end as `hold`. Later phases use hold-then-follow-`π`. |
 | **Paired continuation** | Branches of different actions from the *same* snapshot, compared within that snapshot. This is what makes the measurement E2 and not a comparison of independent episodes. |
 | **Sampled-branch hindsight selector** | `a*_t = argmax_{a ∈ sampled A_t} Q̂_a`, estimated on one repetition set and reported on an independent one. It is a diagnostic, not a global oracle (rubric E4 `◐`). |

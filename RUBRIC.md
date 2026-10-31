@@ -185,7 +185,9 @@ and beat HT's best fixed interface at matched cost.
 ## Open verification items
 
 - [ ] LongContextRouter (openreview.net/forum?id=0GdLxaSjtZ): the title overlaps CPR and the content
-      has not been read (OpenReview blocked automated access). Read it before claiming D3/D4.
+      has not been read. Re-tried 2026-10-31: the forum page, PDF and API all return OpenReview's
+      browser challenge (403); no arXiv or Crossref copy found. Needs a manual download. Read it before
+      claiming D3/D4.
 - [ ] HT E2: do the interfaces share one prefix run per task and switch point? No public code, so
       this can only be settled by the paper's appendix or by asking the authors.
 - [ ] PAIR E1 and C1: benchmarks and outcome definition (abstract only so far; no public code).
