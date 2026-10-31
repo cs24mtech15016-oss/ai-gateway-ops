@@ -202,7 +202,9 @@ and beat HT's best fixed interface at matched cost.
       this can only be settled by the paper's appendix or by asking the authors.
 - [ ] PAIR E1 and C1: benchmarks and outcome definition (abstract only so far; no public code).
 - [x] ACON E3: the released code uses one fixed seed (42) and no repeated runs, so `·` stands.
-- [ ] SAAR E1: read the live benchmark scripts before upgrading from `◐`.
+- [x] SAAR E1: live scripts read 2026-10-31 (`agent_task_live_benchmark.py`, `agentic_routing_live_benchmark.py`):
+      scripted sessions with canned tool results and stubbed earlier assistant turns, scored by substring
+      match. No real agent benchmark, so `◐` stands.
 - [ ] "Counterfactual Rollout Replay: forkable environments as process rewards for SWE agents"
       (ResearchGate, unread): possible E2 precedent in SWE agents.
 - [ ] "Handoff debt" (arXiv 2606.02875) and "A Model Handoff Also Transfers a State Interface"
