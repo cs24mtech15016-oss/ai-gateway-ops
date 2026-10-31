@@ -690,3 +690,8 @@ footer strong { color: white; }
 .gate-list .gate-exit { padding-left: 1rem; border-left: 3px solid var(--lime-dark); color: var(--ink-soft); font-size: .84rem; }
 .gate-list .gate-exit b { display: block; color: #41620d; font-size: .66rem; text-transform: uppercase; letter-spacing: .1em; }
 @media (max-width: 760px) { .gate-list li { grid-template-columns: 50px minmax(0, 1fr); } .gate-list .gate-exit { grid-column: 2; } }
+.result-figure img { display: block; width: 100%; height: auto; border-radius: 8px; }
+.result-meta { display: flex; flex-wrap: wrap; gap: .5rem; margin: 1rem 0 0; padding: 0; list-style: none; }
+.result-meta li { padding: .3rem .65rem; border: 1px solid var(--line); border-radius: 999px; color: var(--ink-soft); background: var(--paper); font-size: .74rem; }
+.research-table td.num, .research-table th.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.research-table tr.is-highlight > * { background: #f4ffdf; color: var(--ink); }

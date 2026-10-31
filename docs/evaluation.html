@@ -10,7 +10,7 @@
     <meta property="og:type" content="website" />
     <title>Evaluation plan and contributions — CheckpointRouter</title>
     <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
-    <link rel="stylesheet" href="styles.css?v=4" />
+    <link rel="stylesheet" href="styles.css?v=5" />
     <script src="app.js?v=3" defer></script>
   </head>
   <body>
@@ -336,15 +336,54 @@
         </ol>
         <aside class="honest-answer reveal"><strong>Go / no-go decision</strong><p>Evaluate each phase on its own incremental value and its stated dependencies. Scale a learned allocation only if it generalizes and improves terminal outcomes after routing, context-transfer, or cache-loss costs. A negative recovery result does not by itself invalidate context allocation; investigate those questions without assuming the failed component helps. Prefer simple rules where they match performance, and stop expanding the action space when its added complexity is not justified.</p></aside>
       </section>
+      <section class="section section-paper" id="results">
+        <div class="section-heading reveal"><span class="section-number">15</span><div>
+          <p class="kicker">Results so far</p><h2>The request-level baseline, measured.</h2>
+          <p class="section-intro">The first trained router is <b>Avengers-Pro</b>, the request-level baseline CPR has to beat. It routes each coding prompt once, before any work starts, over four Claude models. <b>This is not a CPR result:</b> no checkpoint controller exists yet, and these are single-shot prompts, not agent sessions.</p>
+        </div></div>
+
+        <figure class="diagram result-figure reveal" id="pareto">
+          <p class="diagram-title"><span>RESULT 1</span>Accuracy vs cost: Avengers-Pro (k = 64) against single models</p>
+          <img src="assets/results/pareto_597bb430.png" width="1350" height="900" loading="lazy" alt="Scatter of accuracy against cost on 1,813 held-out prompts. Single models: haiku-4-5 74.2% at $23, sonnet-5-5 89.0% at $34, sonnet-5 82.7% at $49, opus-5-5 92.2% at $75. The Avengers-Pro performance-weight sweep runs from 87.9% at $27 (w = 0.3) to 91.9% at $67 (w = 0.9), sitting at or above the single-model frontier between sonnet-5-5 and opus-5-5. The deployed router at w = 0.7 reaches 91.2% at $48. The oracle line is 94.4%." />
+          <figcaption>Each red point is one setting of the router's performance weight <i>w</i> (higher <i>w</i> favours accuracy over cost). The grey dashed line joins the best single models; the green dotted line is the oracle: a prompt counts as solved if any of the four models solves it (accuracy only; it has no cost). The star is the router deployed from this run. Some sweep labels overlap in the source image; exact numbers are in the table below.</figcaption>
+          <ul class="result-meta">
+            <li>Run <code>597bb430</code></li>
+            <li>1,813 held-out prompts (30% split, seed 42)</li>
+            <li>24 coding datasets, 6,022 graded items</li>
+            <li>k = 64 clusters · text-embedding-3-large</li>
+            <li>Cost at list price, USD</li>
+            <li>router-bench <code>a54d013</code></li>
+          </ul>
+        </figure>
+
+        <div class="table-wrap reveal" style="margin-top:1.5rem"><table class="research-table is-compact">
+          <caption>Held-out test split. Accuracy is the macro average over datasets. Values from the run's <code>eval.json</code>.</caption>
+          <thead><tr><th scope="col">Policy</th><th scope="col" class="num">Accuracy</th><th scope="col" class="num">Cost (USD)</th><th scope="col">Reading</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">haiku-4-5 only</th><td class="num">74.2%</td><td class="num">23.34</td><td>Cheapest; loses 18 points against opus-5-5</td></tr>
+            <tr><th scope="row">sonnet-5-5 only</th><td class="num">89.0%</td><td class="num">33.99</td><td>Best value among single models</td></tr>
+            <tr><th scope="row">sonnet-5 only</th><td class="num">82.7%</td><td class="num">48.51</td><td>Dominated: costlier and weaker than sonnet-5-5</td></tr>
+            <tr><th scope="row">opus-5-5 only</th><td class="num">92.2%</td><td class="num">75.01</td><td>Most accurate single model</td></tr>
+            <tr class="is-highlight"><th scope="row">Avengers-Pro, w = 0.7</th><td class="num">91.2%</td><td class="num">48.42</td><td>1.0 point below opus-5-5 for 35% less cost; +2.2 points over sonnet-5-5 for +$14.43</td></tr>
+            <tr><th scope="row">Oracle (hindsight)</th><td class="num">94.4%</td><td class="num">—</td><td>Upper reference, not deployable</td></tr>
+          </tbody>
+        </table></div>
+
+        <div class="evaluation-layout reveal" style="margin-top:2rem">
+          <div class="gap-experiment"><b>What the deployed router picks.</b> sonnet-5-5 for 1,539 prompts (85%), opus-5-5 for 261 (14%), sonnet-5 for 13, haiku-4-5 for none. Most of the saving is “send almost everything to sonnet-5-5, escalate a few prompts to opus-5-5”.</div>
+          <div class="gap-experiment"><b>What it means for CPR.</b> This curve is the request-level reference: CPR must reach a lower cost at the same success margin on <i>agent sessions</i>, where this router can decide only once, from the opening prompt (rubric A1 absent). The weakest dataset is single-shot SWE patching (50.7% routed accuracy, n = 75), the setting where mid-run evidence should matter most.</div>
+        </div>
+        <aside class="honesty-note reveal"><strong>Limits of this result</strong><p>One split and one seed, so there are no confidence intervals yet. The prompts are single-shot, with no tools or workspace state. Costs are list-price tokens with no prompt caching. The 30% split is the evaluation set, and <i>w</i> was swept on it, so the deployed point is chosen with hindsight; a fresh split is needed before quoting it as a held-out number.</p></aside>
+      </section>
       <section class="section section-light" id="contributions">
-        <div class="section-heading reveal"><span class="section-number">15</span><div><p class="kicker">Proposed contributions</p><h2>Evidence first. Algorithmic novelty only if earned.</h2></div></div>
+        <div class="section-heading reveal"><span class="section-number">16</span><div><p class="kicker">Proposed contributions</p><h2>Evidence first. Algorithmic novelty only if earned.</h2></div></div>
         <div class="contribution-list reveal">
           <article><span>01</span><p>A phased checkpoint dataset with reproducible state restoration, model/context allocation definitions, repeated outcomes, and complete resource accounting.</p></article>
           <article><span>02</span><p>Evidence about which execution signals justify revising resource allocations, including—but not limited to—recovery, and how timing interacts with context needs.</p></article>
           <article><span>03</span><p>A checkpoint controller evaluated against request-level, fixed-prefix, per-call, session-aware, best-fixed-packet and composed policies under matched phased action spaces.</p></article>
           <article><span>04</span><p>Controlled tests of model–context effects within one agent session, plus evidence for or against integrating them under a shared episode budget.</p></article>
         </div>
-        <p class="reviewed">Status: research formulation. No checkpoint controller, phased checkpoint dataset, or claimed success–cost result has been implemented in this repository.</p>
+        <p class="reviewed">Status: research formulation. No checkpoint controller or phased checkpoint dataset has been implemented yet. The only measured result is the request-level Avengers-Pro baseline above.</p>
       </section>
     </main>
     <nav class="pager" aria-label="Page navigation"><a class="pager-prev" href="method.html"><small>← Previous</small><strong>Method, system design and data</strong></a><a class="pager-next" href="sources.html"><small>Next →</small><strong>Sources</strong></a></nav>
